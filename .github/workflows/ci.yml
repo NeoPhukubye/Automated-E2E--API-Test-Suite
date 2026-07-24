@@ -26,8 +26,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify test collection
+        run: python -m pytest tests/api/ --collect-only -p no:playwright
+
       - name: Run API tests
-        run: python -m pytest tests/api/ -v --tb=short -p no:playwright
+        run: python -m pytest tests/api/ -v --tb=long -p no:playwright
 
   e2e-tests:
     runs-on: ubuntu-latest
