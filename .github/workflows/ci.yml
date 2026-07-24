@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  BASE_URL: https://fakestoreapi.com
+  UI_BASE_URL: https://fakestoreapi.com
+  HEADLESS: "true"
+
 jobs:
   api-tests:
     runs-on: ubuntu-latest
@@ -22,10 +27,11 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run API tests
-        run: python -m pytest tests/api/ -v --tb=short -m api
+        run: python -m pytest tests/api/ -v --tb=short
 
   e2e-tests:
     runs-on: ubuntu-latest
+    if: ${{ hashFiles('tests/e2e/test_*.py') != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,4 +47,4 @@ jobs:
           python -m playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: python -m pytest tests/e2e/ -v --tb=short -m e2e
+        run: python -m pytest tests/e2e/ -v --tb=short
