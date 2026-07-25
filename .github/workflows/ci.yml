@@ -40,7 +40,8 @@ jobs:
       - name: Check for E2E tests
         id: check
         run: |
-          if find tests/e2e -name 'test_*.py' 2>/dev/null | grep -q .; then
+          count=$(find tests/e2e -name 'test_*.py' 2>/dev/null | wc -l)
+          if [ "$count" -gt 0 ]; then
             echo "has_tests=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_tests=false" >> "$GITHUB_OUTPUT"
