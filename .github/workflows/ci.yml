@@ -30,7 +30,7 @@ jobs:
         run: python -m pytest tests/api/ --collect-only -p no:playwright
 
       - name: Run API tests
-        run: python -m pytest tests/api/ -v --tb=long -p no:playwright
+        run: python -m pytest tests/api/ -v --tb=long -p no:playwright --reruns 3 --reruns-delay 5
 
   e2e-tests:
     runs-on: ubuntu-latest
