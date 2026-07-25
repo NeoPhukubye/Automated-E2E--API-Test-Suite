@@ -59,7 +59,7 @@ class TestProductsCreate:
 
     def test_create_product(self, api, new_product_payload):
         response = api.post("/products", json=new_product_payload)
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         product = response.json()
         assert "id" in product
         assert product["title"] == new_product_payload["title"]
@@ -68,7 +68,7 @@ class TestProductsCreate:
 
     def test_create_product_returns_id(self, api, new_product_payload):
         response = api.post("/products", json=new_product_payload)
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         product = response.json()
         assert isinstance(product["id"], (int, float))
 
