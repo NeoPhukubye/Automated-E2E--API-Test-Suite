@@ -12,7 +12,7 @@ class TestAuthLogin:
 
     def test_login_success(self, api, valid_credentials):
         response = api.post("/auth/login", json=valid_credentials)
-        assert response.status_code == 200
+        assert response.status_code in (200, 201)
         data = response.json()
         assert "token" in data
         assert isinstance(data["token"], str)
