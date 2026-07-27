@@ -1,6 +1,7 @@
 import pytest
 import allure
 from utils.api_client import APIClient
+from config.settings import UI_BASE_URL, HEADLESS
 
 
 @pytest.fixture(scope="session")
@@ -9,11 +10,27 @@ def api():
     return APIClient()
 
 
+@pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    """Configure Playwright browser launch options from settings."""
+    return {**browser_type_launch_args, "headless": HEADLESS}
+
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """Configure Playwright browser context with base URL and viewport."""
+    return {
+        **browser_context_args,
+        "base_url": UI_BASE_URL,
+        "viewport": {"width": 1280, "height": 720},
+    }
+
+
 @pytest.fixture(autouse=True)
 def attach_api_response(request):
     """Attach API response details to Allure report on failure."""
     yield
-    if request.node.rep_call and request.node.rep_call.failed:
+    if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
         if hasattr(request.node, "last_response"):
             response = request.node.last_response
             allure.attach(
