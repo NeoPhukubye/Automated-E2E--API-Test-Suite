@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 @pytest.mark.api
+@pytest.mark.performance
 @allure.feature("Performance")
 class TestResponseTimeSLA:
     """Validate API response times against SLA thresholds."""
@@ -80,6 +81,7 @@ class TestResponseTimeSLA:
 
 
 @pytest.mark.api
+@pytest.mark.performance
 @allure.feature("Performance")
 class TestConcurrentLoad:
     """Validate API stability under concurrent request load."""
