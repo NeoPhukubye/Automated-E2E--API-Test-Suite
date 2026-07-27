@@ -29,8 +29,13 @@ jobs:
       - name: Verify test collection
         run: python -m pytest tests/api/ --collect-only -p no:playwright
 
-      - name: Run API tests
-        run: python -m pytest tests/api/ -v --tb=long -p no:playwright --reruns 3 --reruns-delay 5 --alluredir=allure-results/api --html=reports/api-report.html --self-contained-html
+      - name: Run API tests with coverage
+        run: |
+          python -m pytest tests/api/ -v --tb=long -p no:playwright \
+            --reruns 3 --reruns-delay 5 \
+            --cov=utils --cov=config --cov-report=html:reports/coverage-html --cov-report=xml:reports/coverage.xml \
+            --alluredir=allure-results/api \
+            --html=reports/api-report.html --self-contained-html
 
       - name: Upload API test reports
         if: always()
@@ -40,6 +45,8 @@ jobs:
           path: |
             allure-results/api/
             reports/api-report.html
+            reports/coverage-html/
+            reports/coverage.xml
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -72,7 +79,11 @@ jobs:
 
       - name: Run E2E tests
         if: steps.check.outputs.has_tests == 'true'
-        run: python -m pytest tests/e2e/ -v --tb=short --alluredir=allure-results/e2e --html=reports/e2e-report.html --self-contained-html
+        run: |
+          python -m pytest tests/e2e/ -v --tb=short \
+            --cov=pages --cov-report=html:reports/e2e-coverage-html \
+            --alluredir=allure-results/e2e \
+            --html=reports/e2e-report.html --self-contained-html
 
       - name: Upload E2E test reports
         if: always() && steps.check.outputs.has_tests == 'true'
@@ -82,4 +93,5 @@ jobs:
           path: |
             allure-results/e2e/
             reports/e2e-report.html
+            reports/e2e-coverage-html/
             reports/screenshots/
