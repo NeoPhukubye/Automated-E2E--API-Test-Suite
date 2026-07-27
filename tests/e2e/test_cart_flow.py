@@ -1,13 +1,17 @@
 import pytest
+import allure
 from pages.home_page import HomePage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
 
 
 @pytest.mark.e2e
+@allure.feature("Shopping Cart")
 class TestCartFlow:
     """E2E tests for the shopping cart workflow."""
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Add to Cart")
     def test_add_item_to_cart(self, logged_in_page):
         """Verify adding an item updates the cart badge."""
         home = HomePage(logged_in_page)
@@ -15,6 +19,8 @@ class TestCartFlow:
         assert home.is_cart_badge_visible()
         assert home.get_cart_badge_count() == "1"
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Add to Cart")
     def test_add_multiple_items(self, logged_in_page):
         """Verify adding multiple items increments the badge."""
         home = HomePage(logged_in_page)
@@ -22,6 +28,8 @@ class TestCartFlow:
         home.add_item_to_cart(1)
         assert home.get_cart_badge_count() == "2"
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Remove from Cart")
     def test_remove_item_from_home(self, logged_in_page):
         """Verify removing an item from home page decrements badge."""
         home = HomePage(logged_in_page)
@@ -29,6 +37,8 @@ class TestCartFlow:
         home.remove_item_from_cart(0)
         assert not home.is_cart_badge_visible()
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Cart Contents")
     def test_cart_shows_added_items(self, logged_in_page):
         """Verify cart page displays the correct items."""
         home = HomePage(logged_in_page)
@@ -39,6 +49,8 @@ class TestCartFlow:
         assert cart.get_cart_item_count() == 1
         assert product_name in cart.get_cart_item_names()
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Remove from Cart")
     def test_remove_item_from_cart_page(self, logged_in_page):
         """Verify removing an item from the cart page works."""
         home = HomePage(logged_in_page)
@@ -48,6 +60,8 @@ class TestCartFlow:
         cart.remove_item(0)
         assert cart.get_cart_item_count() == 0
 
+    @allure.severity(allure.severity_level.MINOR)
+    @allure.story("Navigation")
     def test_continue_shopping_returns_to_inventory(self, logged_in_page):
         """Verify continue shopping navigates back to products."""
         home = HomePage(logged_in_page)
@@ -56,6 +70,8 @@ class TestCartFlow:
         cart.continue_shopping()
         assert "/inventory.html" in logged_in_page.url
 
+    @allure.severity(allure.severity_level.BLOCKER)
+    @allure.story("Checkout")
     def test_full_checkout_flow(self, logged_in_page):
         """Verify complete purchase flow from cart to order confirmation."""
         home = HomePage(logged_in_page)
@@ -72,6 +88,8 @@ class TestCartFlow:
 
         assert "Thank you for your order" in checkout.get_complete_header()
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Checkout Validation")
     def test_checkout_requires_info(self, logged_in_page):
         """Verify checkout shows error if info is missing."""
         home = HomePage(logged_in_page)

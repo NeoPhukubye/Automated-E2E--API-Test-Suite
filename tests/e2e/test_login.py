@@ -1,8 +1,10 @@
 import pytest
+import allure
 from pages.login_page import LoginPage
 
 
 @pytest.mark.e2e
+@allure.feature("Authentication")
 class TestLogin:
     """E2E tests for the login functionality."""
 
@@ -10,12 +12,16 @@ class TestLogin:
     LOCKED_USER = "locked_out_user"
     PASSWORD = "secret_sauce"
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Valid Login")
     def test_successful_login(self, login_page):
         """Verify standard user can log in successfully."""
         login_page.navigate()
         login_page.login(self.STANDARD_USER, self.PASSWORD)
         assert "/inventory.html" in login_page.get_url()
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Account Lockout")
     def test_locked_out_user(self, login_page):
         """Verify locked out user sees an error message."""
         login_page.navigate()
@@ -23,6 +29,8 @@ class TestLogin:
         assert login_page.is_error_displayed()
         assert "locked out" in login_page.get_error_message().lower()
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Invalid Credentials")
     def test_invalid_credentials(self, login_page):
         """Verify invalid credentials show an error."""
         login_page.navigate()
@@ -30,6 +38,8 @@ class TestLogin:
         assert login_page.is_error_displayed()
         assert "Username and password" in login_page.get_error_message()
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Form Validation")
     def test_empty_username(self, login_page):
         """Verify empty username shows validation error."""
         login_page.navigate()
@@ -37,6 +47,8 @@ class TestLogin:
         assert login_page.is_error_displayed()
         assert "Username is required" in login_page.get_error_message()
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Form Validation")
     def test_empty_password(self, login_page):
         """Verify empty password shows validation error."""
         login_page.navigate()
