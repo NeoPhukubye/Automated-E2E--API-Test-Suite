@@ -1,7 +1,7 @@
 from faker import Faker
 
 
-class TestDataGenerator:
+class DataGenerator:
     """Generates randomized test data using Faker."""
 
     def __init__(self, locale: str = "en_US"):

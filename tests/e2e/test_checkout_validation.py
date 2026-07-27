@@ -3,7 +3,7 @@ import allure
 from pages.home_page import HomePage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
-from utils.test_data import TestDataGenerator
+from utils.test_data import DataGenerator
 
 
 @pytest.mark.e2e
