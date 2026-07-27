@@ -8,7 +8,7 @@ on:
 
 env:
   BASE_URL: https://fakestoreapi.com
-  UI_BASE_URL: https://fakestoreapi.com
+  UI_BASE_URL: https://www.saucedemo.com
   HEADLESS: "true"
 
 jobs:
@@ -30,7 +30,16 @@ jobs:
         run: python -m pytest tests/api/ --collect-only -p no:playwright
 
       - name: Run API tests
-        run: python -m pytest tests/api/ -v --tb=long -p no:playwright --reruns 3 --reruns-delay 5
+        run: python -m pytest tests/api/ -v --tb=long -p no:playwright --reruns 3 --reruns-delay 5 --alluredir=allure-results/api --html=reports/api-report.html --self-contained-html
+
+      - name: Upload API test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-reports
+          path: |
+            allure-results/api/
+            reports/api-report.html
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -63,4 +72,14 @@ jobs:
 
       - name: Run E2E tests
         if: steps.check.outputs.has_tests == 'true'
-        run: python -m pytest tests/e2e/ -v --tb=short
+        run: python -m pytest tests/e2e/ -v --tb=short --alluredir=allure-results/e2e --html=reports/e2e-report.html --self-contained-html
+
+      - name: Upload E2E test reports
+        if: always() && steps.check.outputs.has_tests == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-reports
+          path: |
+            allure-results/e2e/
+            reports/e2e-report.html
+            reports/screenshots/
