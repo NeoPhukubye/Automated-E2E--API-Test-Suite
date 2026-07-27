@@ -1,5 +1,6 @@
 import pytest
 import allure
+from utils.schema_validator import validate_auth_token_schema
 
 
 @pytest.mark.api
@@ -18,9 +19,7 @@ class TestAuthLogin:
         response = api.post("/auth/login", json=valid_credentials)
         assert response.status_code in (200, 201)
         data = response.json()
-        assert "token" in data
-        assert isinstance(data["token"], str)
-        assert len(data["token"]) > 0
+        validate_auth_token_schema(data)
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Invalid Credentials")
