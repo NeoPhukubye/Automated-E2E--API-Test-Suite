@@ -1,10 +1,14 @@
 import pytest
+import allure
 
 
 @pytest.mark.api
+@allure.feature("Pagination & Sorting")
 class TestProductsPagination:
     """Tests for sort and limit query parameters on /products."""
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Products")
     def test_sort_ascending(self, api):
         response = api.get("/products", params={"sort": "asc"})
         assert response.status_code == 200
@@ -12,6 +16,8 @@ class TestProductsPagination:
         ids = [p["id"] for p in products]
         assert ids == sorted(ids)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Products")
     def test_sort_descending(self, api):
         response = api.get("/products", params={"sort": "desc"})
         assert response.status_code == 200
@@ -19,16 +25,22 @@ class TestProductsPagination:
         ids = [p["id"] for p in products]
         assert ids == sorted(ids, reverse=True)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Limit Products")
     def test_limit_one(self, api):
         response = api.get("/products", params={"limit": 1})
         assert response.status_code == 200
         assert len(response.json()) == 1
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Limit Products")
     def test_limit_ten(self, api):
         response = api.get("/products", params={"limit": 10})
         assert response.status_code == 200
         assert len(response.json()) == 10
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Combined Parameters")
     def test_sort_and_limit_combined(self, api):
         response = api.get("/products", params={"sort": "desc", "limit": 3})
         assert response.status_code == 200
@@ -39,9 +51,12 @@ class TestProductsPagination:
 
 
 @pytest.mark.api
+@allure.feature("Pagination & Sorting")
 class TestCartsPagination:
     """Tests for sort and limit query parameters on /carts."""
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Carts")
     def test_sort_ascending(self, api):
         response = api.get("/carts", params={"sort": "asc"})
         assert response.status_code == 200
@@ -49,6 +64,8 @@ class TestCartsPagination:
         ids = [c["id"] for c in carts]
         assert ids == sorted(ids)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Carts")
     def test_sort_descending(self, api):
         response = api.get("/carts", params={"sort": "desc"})
         assert response.status_code == 200
@@ -56,11 +73,15 @@ class TestCartsPagination:
         ids = [c["id"] for c in carts]
         assert ids == sorted(ids, reverse=True)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Limit Carts")
     def test_limit_two(self, api):
         response = api.get("/carts", params={"limit": 2})
         assert response.status_code == 200
         assert len(response.json()) == 2
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Combined Parameters")
     def test_sort_and_limit_combined(self, api):
         response = api.get("/carts", params={"sort": "asc", "limit": 2})
         assert response.status_code == 200
@@ -71,9 +92,12 @@ class TestCartsPagination:
 
 
 @pytest.mark.api
+@allure.feature("Pagination & Sorting")
 class TestUsersPagination:
     """Tests for sort and limit query parameters on /users."""
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Users")
     def test_sort_ascending(self, api):
         response = api.get("/users", params={"sort": "asc"})
         assert response.status_code == 200
@@ -81,6 +105,8 @@ class TestUsersPagination:
         ids = [u["id"] for u in users]
         assert ids == sorted(ids)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Sort Users")
     def test_sort_descending(self, api):
         response = api.get("/users", params={"sort": "desc"})
         assert response.status_code == 200
@@ -88,11 +114,15 @@ class TestUsersPagination:
         ids = [u["id"] for u in users]
         assert ids == sorted(ids, reverse=True)
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Limit Users")
     def test_limit_two(self, api):
         response = api.get("/users", params={"limit": 2})
         assert response.status_code == 200
         assert len(response.json()) == 2
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Combined Parameters")
     def test_sort_and_limit_combined(self, api):
         response = api.get("/users", params={"sort": "desc", "limit": 4})
         assert response.status_code == 200

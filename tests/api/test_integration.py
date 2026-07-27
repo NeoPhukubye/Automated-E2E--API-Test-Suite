@@ -1,8 +1,10 @@
 import pytest
+import allure
 
 
 @pytest.mark.api
 @pytest.mark.integration
+@allure.feature("Integration Workflows")
 class TestUserLoginWorkflow:
     """Integration tests: user creation -> login -> token validation."""
 
@@ -23,6 +25,8 @@ class TestUserLoginWorkflow:
             "phone": "012-000-1111",
         }
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("User Registration Flow")
     def test_create_user_then_login(self, api, test_user):
         create_resp = api.post("/users", json=test_user)
         assert create_resp.status_code in (200, 201)
@@ -39,9 +43,12 @@ class TestUserLoginWorkflow:
 
 @pytest.mark.api
 @pytest.mark.integration
+@allure.feature("Integration Workflows")
 class TestCartWorkflow:
     """Integration tests: browse products -> add to cart -> verify cart."""
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Shopping Flow")
     def test_browse_and_add_to_cart(self, api):
         products_resp = api.get("/products", params={"limit": 3})
         assert products_resp.status_code == 200
@@ -58,6 +65,8 @@ class TestCartWorkflow:
         assert "id" in cart
         assert "products" in cart
 
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Cart Update Flow")
     def test_update_cart_quantity(self, api):
         cart_resp = api.get("/carts/1")
         assert cart_resp.status_code == 200
@@ -75,6 +84,8 @@ class TestCartWorkflow:
         )
         assert update_resp.status_code == 200
 
+    @allure.severity(allure.severity_level.BLOCKER)
+    @allure.story("Cart Lifecycle")
     def test_full_cart_lifecycle(self, api):
         # Create
         payload = {
@@ -102,9 +113,12 @@ class TestCartWorkflow:
 
 @pytest.mark.api
 @pytest.mark.integration
+@allure.feature("Integration Workflows")
 class TestProductCategoryWorkflow:
     """Integration tests: fetch categories -> validate products per category."""
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.story("Category Browsing")
     def test_all_categories_have_products(self, api):
         cat_resp = api.get("/products/categories")
         assert cat_resp.status_code == 200
