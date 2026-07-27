@@ -48,7 +48,7 @@ class TestCheckoutValidation:
     @allure.story("Valid Submission")
     def test_checkout_with_generated_data(self, logged_in_page):
         """Verify checkout works with randomly generated valid data."""
-        data = TestDataGenerator()
+        data = DataGenerator()
         self._go_to_checkout(logged_in_page)
         checkout = CheckoutPage(logged_in_page)
         checkout.fill_shipping_info(
