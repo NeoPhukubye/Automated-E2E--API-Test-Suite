@@ -1,53 +1,114 @@
+from jsonschema import validate, ValidationError
+
+
+PRODUCT_SCHEMA = {
+    "type": "object",
+    "required": ["id", "title", "price", "description", "category", "image"],
+    "properties": {
+        "id": {"type": "number"},
+        "title": {"type": "string", "minLength": 1},
+        "price": {"type": "number", "minimum": 0},
+        "description": {"type": "string"},
+        "category": {"type": "string", "minLength": 1},
+        "image": {"type": "string", "format": "uri"},
+        "rating": {
+            "type": "object",
+            "properties": {
+                "rate": {"type": "number", "minimum": 0, "maximum": 5},
+                "count": {"type": "integer", "minimum": 0},
+            },
+        },
+    },
+    "additionalProperties": False,
+}
+
+CART_SCHEMA = {
+    "type": "object",
+    "required": ["id", "userId", "date", "products"],
+    "properties": {
+        "id": {"type": "number"},
+        "userId": {"type": "number"},
+        "date": {"type": "string"},
+        "products": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["productId", "quantity"],
+                "properties": {
+                    "productId": {"type": "number"},
+                    "quantity": {"type": "number", "minimum": 1},
+                },
+            },
+        },
+        "__v": {"type": "number"},
+    },
+    "additionalProperties": False,
+}
+
+USER_SCHEMA = {
+    "type": "object",
+    "required": ["id", "email", "username", "password", "name", "address", "phone"],
+    "properties": {
+        "id": {"type": "number"},
+        "email": {"type": "string"},
+        "username": {"type": "string", "minLength": 1},
+        "password": {"type": "string"},
+        "name": {
+            "type": "object",
+            "required": ["firstname", "lastname"],
+            "properties": {
+                "firstname": {"type": "string", "minLength": 1},
+                "lastname": {"type": "string", "minLength": 1},
+            },
+        },
+        "address": {
+            "type": "object",
+            "required": ["city", "street", "number", "zipcode", "geolocation"],
+            "properties": {
+                "city": {"type": "string"},
+                "street": {"type": "string"},
+                "number": {"type": ["integer", "number"]},
+                "zipcode": {"type": "string"},
+                "geolocation": {
+                    "type": "object",
+                    "required": ["lat", "long"],
+                    "properties": {
+                        "lat": {"type": "string"},
+                        "long": {"type": "string"},
+                    },
+                },
+            },
+        },
+        "phone": {"type": "string"},
+        "__v": {"type": "number"},
+    },
+    "additionalProperties": False,
+}
+
+AUTH_TOKEN_SCHEMA = {
+    "type": "object",
+    "required": ["token"],
+    "properties": {
+        "token": {"type": "string", "minLength": 1},
+    },
+}
+
+
 def validate_product_schema(product: dict) -> None:
-    """Assert that a product response contains all expected fields with correct types."""
-    required_fields = {
-        "id": (int, float),
-        "title": str,
-        "price": (int, float),
-        "description": str,
-        "category": str,
-        "image": str,
-    }
-    for field, expected_type in required_fields.items():
-        assert field in product, f"Missing field: {field}"
-        assert isinstance(product[field], expected_type), (
-            f"Field '{field}' expected {expected_type}, got {type(product[field])}"
-        )
+    """Validate a product response against the JSON Schema contract."""
+    validate(instance=product, schema=PRODUCT_SCHEMA)
 
 
 def validate_cart_schema(cart: dict) -> None:
-    """Assert that a cart response contains all expected fields with correct types."""
-    required_fields = {
-        "id": (int, float),
-        "userId": (int, float),
-        "date": str,
-        "products": list,
-    }
-    for field, expected_type in required_fields.items():
-        assert field in cart, f"Missing field: {field}"
-        assert isinstance(cart[field], expected_type), (
-            f"Field '{field}' expected {expected_type}, got {type(cart[field])}"
-        )
-    for item in cart["products"]:
-        assert "productId" in item, "Cart product missing 'productId'"
-        assert "quantity" in item, "Cart product missing 'quantity'"
+    """Validate a cart response against the JSON Schema contract."""
+    validate(instance=cart, schema=CART_SCHEMA)
 
 
 def validate_user_schema(user: dict) -> None:
-    """Assert that a user response contains all expected fields with correct types."""
-    required_fields = {
-        "id": (int, float),
-        "email": str,
-        "username": str,
-        "password": str,
-        "phone": str,
-    }
-    for field, expected_type in required_fields.items():
-        assert field in user, f"Missing field: {field}"
-        assert isinstance(user[field], expected_type), (
-            f"Field '{field}' expected {expected_type}, got {type(user[field])}"
-        )
-    assert "name" in user, "Missing field: name"
-    assert "firstname" in user["name"], "Missing field: name.firstname"
-    assert "lastname" in user["name"], "Missing field: name.lastname"
-    assert "address" in user, "Missing field: address"
+    """Validate a user response against the JSON Schema contract."""
+    validate(instance=user, schema=USER_SCHEMA)
+
+
+def validate_auth_token_schema(response: dict) -> None:
+    """Validate an auth token response against the JSON Schema contract."""
+    validate(instance=response, schema=AUTH_TOKEN_SCHEMA)
