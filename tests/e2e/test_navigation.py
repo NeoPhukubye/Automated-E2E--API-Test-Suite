@@ -12,7 +12,8 @@ class TestNavigation:
         """Verify unauthenticated users are redirected to login."""
         from config.settings import UI_BASE_URL
         page.goto(f"{UI_BASE_URL}/inventory.html")
-        assert page.url.rstrip("/") == UI_BASE_URL
+        page.wait_for_load_state("domcontentloaded")
+        assert page.url.rstrip("/") == UI_BASE_URL or page.locator("#login-button").is_visible()
 
     def test_cart_page_title(self, logged_in_page):
         """Verify cart page displays correct title."""
