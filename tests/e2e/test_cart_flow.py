@@ -10,6 +10,7 @@ from pages.checkout_page import CheckoutPage
 class TestCartFlow:
     """E2E tests for the shopping cart workflow."""
 
+    @pytest.mark.smoke
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Add to Cart")
     def test_add_item_to_cart(self, logged_in_page):
