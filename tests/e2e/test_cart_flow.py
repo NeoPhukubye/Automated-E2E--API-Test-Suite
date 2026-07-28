@@ -71,6 +71,7 @@ class TestCartFlow:
         cart.continue_shopping()
         assert "/inventory.html" in logged_in_page.url
 
+    @pytest.mark.smoke
     @allure.severity(allure.severity_level.BLOCKER)
     @allure.story("Checkout")
     def test_full_checkout_flow(self, logged_in_page):
