@@ -12,6 +12,7 @@ class TestLogin:
     LOCKED_USER = "locked_out_user"
     PASSWORD = "secret_sauce"
 
+    @pytest.mark.smoke
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Valid Login")
     def test_successful_login(self, login_page):
