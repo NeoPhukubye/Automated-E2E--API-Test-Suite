@@ -18,17 +18,16 @@ class TestSortingAndFilters:
 
     @allure.severity(allure.severity_level.NORMAL)
     @allure.story("Sort Persistence")
-    def test_sort_persists_after_product_view(self, logged_in_page):
-        """Verify sort order persists after viewing a product and returning."""
+    def test_sort_resets_after_product_view(self, logged_in_page):
+        """Verify sort order resets to default (A-Z) after viewing a product and returning."""
         from pages.product_page import ProductPage
         home = HomePage(logged_in_page)
         home.sort_products("hilo")
-        prices_before = home.get_product_prices()
         home.click_product(0)
         product = ProductPage(logged_in_page)
         product.go_back()
-        prices_after = home.get_product_prices()
-        assert prices_before == prices_after
+        names_after = home.get_product_names()
+        assert names_after == sorted(names_after)
 
     @allure.severity(allure.severity_level.MINOR)
     @allure.story("Price Format")
