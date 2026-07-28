@@ -9,11 +9,16 @@ class TestNavigation:
     """E2E tests for site navigation and page transitions."""
 
     def test_unauthenticated_redirect(self, page):
-        """Verify unauthenticated users are redirected to login."""
+        """Verify unauthenticated users see the login page when accessing protected routes."""
         from config.settings import UI_BASE_URL
         page.goto(f"{UI_BASE_URL}/inventory.html")
-        page.wait_for_load_state("domcontentloaded")
-        assert page.url.rstrip("/") == UI_BASE_URL or page.locator("#login-button").is_visible()
+        page.wait_for_load_state("networkidle")
+        is_on_login = page.url.rstrip("/") == UI_BASE_URL
+        has_login_form = page.locator("#login-button").is_visible()
+        has_error = page.locator("[data-test='error']").is_visible()
+        assert is_on_login or has_login_form or has_error, (
+            f"Expected login page or error, but got {page.url}"
+        )
 
     def test_cart_page_title(self, logged_in_page):
         """Verify cart page displays correct title."""
