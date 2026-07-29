@@ -80,8 +80,8 @@ jobs:
       - name: Run E2E tests
         if: steps.check.outputs.has_tests == 'true'
         run: |
-          python -m pytest tests/e2e/ -v --tb=short \
-            --cov=pages --cov-report=html:reports/e2e-coverage-html \
+          python -m pytest tests/e2e/ --tb=short \
+            --cov=pages --cov-report=term-missing --cov-report=html:reports/e2e-coverage-html \
             --alluredir=allure-results/e2e \
             --html=reports/e2e-report.html --self-contained-html
 
