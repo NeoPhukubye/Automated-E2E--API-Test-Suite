@@ -31,9 +31,9 @@ jobs:
 
       - name: Run API tests with coverage
         run: |
-          python -m pytest tests/api/ -v --tb=long -p no:playwright \
+          python -m pytest tests/api/ --tb=long -p no:playwright \
             --reruns 3 --reruns-delay 5 \
-            --cov=utils --cov=config --cov-report=html:reports/coverage-html --cov-report=xml:reports/coverage.xml \
+            --cov=utils --cov=config --cov-report=term-missing --cov-report=html:reports/coverage-html --cov-report=xml:reports/coverage.xml \
             --alluredir=allure-results/api \
             --html=reports/api-report.html --self-contained-html
 
