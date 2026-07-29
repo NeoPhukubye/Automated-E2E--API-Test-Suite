@@ -1,6 +1,7 @@
 import pytest
 import allure
 from utils.api_client import APIClient
+from utils.test_data import DataGenerator
 from config.settings import UI_BASE_URL, HEADLESS
 
 
