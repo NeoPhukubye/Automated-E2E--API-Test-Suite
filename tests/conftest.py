@@ -12,6 +12,12 @@ def api():
 
 
 @pytest.fixture(scope="session")
+def fake():
+    """Provide a shared DataGenerator instance for the test session."""
+    return DataGenerator()
+
+
+@pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
     """Configure Playwright browser launch options from settings."""
     return {**browser_type_launch_args, "headless": HEADLESS}
