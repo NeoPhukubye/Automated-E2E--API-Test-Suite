@@ -1,18 +1,20 @@
+"""Root pytest fixtures shared across API and E2E tests."""
+
 import pytest
 import allure
 from utils.api_client import APIClient
 from utils.test_data import DataGenerator
-from config.settings import UI_BASE_URL, HEADLESS
+from config.settings import UI_BASE_URL, HEADLESS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT
 
 
 @pytest.fixture(scope="session")
-def api():
+def api() -> APIClient:
     """Provide a shared API client instance for the test session."""
     return APIClient()
 
 
 @pytest.fixture(scope="session")
-def fake():
+def fake() -> DataGenerator:
     """Provide a shared DataGenerator instance for the test session."""
     return DataGenerator()
 
@@ -29,7 +31,7 @@ def browser_context_args(browser_context_args):
     return {
         **browser_context_args,
         "base_url": UI_BASE_URL,
-        "viewport": {"width": 1280, "height": 720},
+        "viewport": {"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT},
     }
 
 
