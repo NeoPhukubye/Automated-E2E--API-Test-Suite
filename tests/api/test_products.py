@@ -1,3 +1,5 @@
+"""Tests for GET /products endpoints."""
+
 import pytest
 import allure
 from utils.schema_validator import validate_product_schema
@@ -61,14 +63,9 @@ class TestProductsCreate:
     """Tests for POST /products endpoint."""
 
     @pytest.fixture
-    def new_product_payload(self):
-        return {
-            "title": "Test Product",
-            "price": 29.99,
-            "description": "A test product for automation",
-            "image": "https://i.pravatar.cc",
-            "category": "electronics",
-        }
+    def new_product_payload(self, fake):
+        """Generate a random product payload for test isolation."""
+        return fake.generate_product_payload()
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Create Product")

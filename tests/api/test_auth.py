@@ -1,3 +1,5 @@
+"""Tests for POST /auth/login endpoint."""
+
 import pytest
 import allure
 from utils.schema_validator import validate_auth_token_schema

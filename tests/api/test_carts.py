@@ -1,3 +1,5 @@
+"""Tests for GET /carts endpoints."""
+
 import pytest
 import allure
 from utils.schema_validator import validate_cart_schema
@@ -71,15 +73,9 @@ class TestCartsCreate:
     """Tests for POST /carts endpoint."""
 
     @pytest.fixture
-    def new_cart_payload(self):
-        return {
-            "userId": 1,
-            "date": "2024-01-15",
-            "products": [
-                {"productId": 1, "quantity": 2},
-                {"productId": 3, "quantity": 1},
-            ],
-        }
+    def new_cart_payload(self, fake):
+        """Generate a random cart payload for test isolation."""
+        return fake.generate_cart_payload(user_id=1)
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Create Cart")
@@ -96,7 +92,7 @@ class TestCartsCreate:
         assert response.status_code in (200, 201)
         cart = response.json()
         assert "products" in cart
-        assert len(cart["products"]) == 2
+        assert len(cart["products"]) == len(new_cart_payload["products"])
 
 
 @pytest.mark.api

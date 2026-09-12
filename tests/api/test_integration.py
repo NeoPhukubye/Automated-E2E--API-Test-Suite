@@ -1,3 +1,5 @@
+"""Integration tests: user creation -> login -> token validation."""
+
 import pytest
 import allure
 
@@ -9,21 +11,9 @@ class TestUserLoginWorkflow:
     """Integration tests: user creation -> login -> token validation."""
 
     @pytest.fixture
-    def test_user(self):
-        return {
-            "email": "workflow@test.com",
-            "username": "workflow_user",
-            "password": "WorkflowPass1!",
-            "name": {"firstname": "Workflow", "lastname": "Tester"},
-            "address": {
-                "city": "Pretoria",
-                "street": "100 Flow St",
-                "number": 10,
-                "zipcode": "0001",
-                "geolocation": {"lat": "-25.7479", "long": "28.2293"},
-            },
-            "phone": "012-000-1111",
-        }
+    def test_user(self, fake):
+        """Generate a random user for test isolation."""
+        return fake.generate_user_payload()
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("User Registration Flow")

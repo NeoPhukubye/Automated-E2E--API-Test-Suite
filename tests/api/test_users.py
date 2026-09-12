@@ -1,3 +1,5 @@
+"""Tests for GET /users endpoints."""
+
 import pytest
 import allure
 from utils.schema_validator import validate_user_schema
@@ -51,21 +53,9 @@ class TestUsersCreate:
     """Tests for POST /users endpoint."""
 
     @pytest.fixture
-    def new_user_payload(self):
-        return {
-            "email": "testuser@example.com",
-            "username": "testuser_auto",
-            "password": "SecurePass123",
-            "name": {"firstname": "Test", "lastname": "User"},
-            "address": {
-                "city": "Johannesburg",
-                "street": "123 Main St",
-                "number": 42,
-                "zipcode": "2000",
-                "geolocation": {"lat": "-26.2041", "long": "28.0473"},
-            },
-            "phone": "012-345-6789",
-        }
+    def new_user_payload(self, fake):
+        """Generate a random user payload for test isolation."""
+        return fake.generate_user_payload()
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Create User")
