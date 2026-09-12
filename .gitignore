@@ -14,6 +14,7 @@ venv/
 reports/
 allure-results/
 .pytest_cache/
+.coverage
 
 # IDE
 .idea/
