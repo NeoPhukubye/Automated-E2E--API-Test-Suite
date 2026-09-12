@@ -1,3 +1,5 @@
+"""E2E test fixtures for Sauce Demo browser tests."""
+
 import os
 import pytest
 import allure
@@ -9,6 +11,7 @@ from pages.checkout_page import CheckoutPage
 
 STANDARD_USER = "standard_user"
 STANDARD_PASSWORD = "secret_sauce"
+LOCKED_USER = "locked_out_user"
 
 
 @pytest.fixture()
@@ -51,6 +54,14 @@ def logged_in_page(page):
     return page
 
 
+@pytest.fixture()
+def page_with_item(logged_in_page):
+    """Provide a page with one item already added to the cart."""
+    home = HomePage(logged_in_page)
+    home.add_item_to_cart(0)
+    return logged_in_page
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """Capture screenshot on test failure and attach to Allure report."""
@@ -62,7 +73,8 @@ def pytest_runtest_makereport(item, call):
             screenshot_dir = "reports/screenshots"
             os.makedirs(screenshot_dir, exist_ok=True)
             screenshot_path = os.path.join(
-                screenshot_dir, f"{item.nodeid.replace('::', '_').replace('/', '_')}.png"
+                screenshot_dir,
+                f"{item.nodeid.replace('::', '_').replace('/', '_')}.png",
             )
             page.screenshot(path=screenshot_path)
             allure.attach.file(
