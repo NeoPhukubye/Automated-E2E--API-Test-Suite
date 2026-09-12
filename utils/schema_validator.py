@@ -1,3 +1,6 @@
+"""JSON Schema validation contracts for API responses."""
+
+from typing import Any, Dict, List, Optional
 from jsonschema import validate, ValidationError
 
 
@@ -112,3 +115,60 @@ def validate_user_schema(user: dict) -> None:
 def validate_auth_token_schema(response: dict) -> None:
     """Validate an auth token response against the JSON Schema contract."""
     validate(instance=response, schema=AUTH_TOKEN_SCHEMA)
+
+
+def validate_products(products: List[dict]) -> None:
+    """Validate a list of product responses against the schema."""
+    if not isinstance(products, list):
+        raise TypeError(f"Expected list, got {type(products).__name__}")
+    for i, product in enumerate(products):
+        try:
+            validate_product_schema(product)
+        except ValidationError as e:
+            raise ValidationError(
+                f"Product at index {i} failed validation: {e.message}"
+            ) from e
+
+
+def validate_carts(carts: List[dict]) -> None:
+    """Validate a list of cart responses against the schema."""
+    if not isinstance(carts, list):
+        raise TypeError(f"Expected list, got {type(carts).__name__}")
+    for i, cart in enumerate(carts):
+        try:
+            validate_cart_schema(cart)
+        except ValidationError as e:
+            raise ValidationError(
+                f"Cart at index {i} failed validation: {e.message}"
+            ) from e
+
+
+def validate_users(users: List[dict]) -> None:
+    """Validate a list of user responses against the schema."""
+    if not isinstance(users, list):
+        raise TypeError(f"Expected list, got {type(users).__name__}")
+    for i, user in enumerate(users):
+        try:
+            validate_user_schema(user)
+        except ValidationError as e:
+            raise ValidationError(
+                f"User at index {i} failed validation: {e.message}"
+            ) from e
+
+
+def get_schema_for_type(entity_type: str) -> Optional[Dict[str, Any]]:
+    """Return the JSON schema for a given entity type.
+
+    Args:
+        entity_type: One of 'product', 'cart', 'user', 'auth_token'.
+
+    Returns:
+        The JSON schema dict, or None if the type is unknown.
+    """
+    schemas = {
+        "product": PRODUCT_SCHEMA,
+        "cart": CART_SCHEMA,
+        "user": USER_SCHEMA,
+        "auth_token": AUTH_TOKEN_SCHEMA,
+    }
+    return schemas.get(entity_type)
