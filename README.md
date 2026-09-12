@@ -63,7 +63,7 @@ Comprehensive end-to-end and API automated test framework targeting the [FakeSto
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/Automated-E2E--API-Test-Suite.git
+git clone https://github.com/your-org/Automated-E2E--API-Test-Suite.git
 cd Automated-E2E--API-Test-Suite
 
 # Create virtual environment (recommended)
