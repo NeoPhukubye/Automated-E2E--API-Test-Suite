@@ -51,6 +51,8 @@ def logged_in_page(page):
     login.navigate()
     login.login(STANDARD_USER, STANDARD_PASSWORD)
     page.wait_for_url("**/inventory.html")
+    page.wait_for_load_state("networkidle")
+    page.wait_for_selector(".inventory_item")
     return page
 
 
@@ -59,6 +61,7 @@ def page_with_item(logged_in_page):
     """Provide a page with one item already added to the cart."""
     home = HomePage(logged_in_page)
     home.add_item_to_cart(0)
+    page.wait_for_selector(home.SHOPPING_CART_BADGE)
     return logged_in_page
 
 
