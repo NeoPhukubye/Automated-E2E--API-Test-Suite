@@ -10,7 +10,7 @@ class DataGenerator:
     def __init__(self, locale: str = "en_US"):
         self._fake = Faker(locale)
         # Seed for reproducibility in CI
-        Faker.seed(self._fake, 42)
+        self._fake.seed_instance(42)
 
     def first_name(self) -> str:
         return self._fake.first_name()
