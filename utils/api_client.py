@@ -27,7 +27,10 @@ class APIClient:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.session = requests.Session()
-        self.session.headers.update({"Content-Type": "application/json"})
+        self.session.headers.update({
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        })
 
         retry_strategy = Retry(
             total=3,
