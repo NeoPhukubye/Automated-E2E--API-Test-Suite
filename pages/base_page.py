@@ -11,8 +11,9 @@ class BasePage:
         self.page = page
 
     def navigate(self, path: str = ""):
-        """Navigate to the given path."""
+        """Navigate to the given path and wait for network idle."""
         self.page.goto(path)
+        self.page.wait_for_load_state("networkidle")
 
     def get_title(self) -> str:
         """Return the page title."""
@@ -55,11 +56,13 @@ class BasePage:
         return self.page.locator(selector).all_text_contents()
 
     def click(self, selector: str):
-        """Click an element by selector."""
+        """Click an element by selector, waiting for visibility first."""
+        self.page.locator(selector).wait_for(state="visible")
         self.page.locator(selector).click()
 
     def fill(self, selector: str, value: str):
-        """Fill an input field with a value."""
+        """Fill an input field with a value, waiting for visibility first."""
+        self.page.locator(selector).wait_for(state="visible")
         self.page.locator(selector).fill(value)
 
     def press(self, selector: str, key: str):
