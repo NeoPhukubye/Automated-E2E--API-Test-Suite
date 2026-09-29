@@ -61,10 +61,10 @@ class DataGenerator:
         return self._fake.random_int(min=min, max=max)
 
     def random_choice(self, choices: list) -> Any:
-        return self._fake.choice(choices)
+        return self._fake.random.choice(choices)
 
     def random_sample(self, population: list, k: int = 1) -> list:
-        return self._fake.sample(population, k=k)
+        return self._fake.random.sample(population, k=k)
 
     def generate_user_payload(self) -> Dict[str, Any]:
         """Generate a complete user payload matching the API schema."""
