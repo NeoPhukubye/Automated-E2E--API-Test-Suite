@@ -1,5 +1,5 @@
 from pages.base_page import BasePage
-from config.settings import UI_BASE_URL
+from config.settings import UI_BASE_URL, TIMEOUT
 
 
 class CheckoutPage(BasePage):
@@ -19,6 +19,25 @@ class CheckoutPage(BasePage):
 
     def navigate(self, path: str = ""):
         super().navigate(self.URL)
+        self.wait_until_ready()
+
+    def wait_until_ready(self, timeout: int = TIMEOUT * 1000):
+        """Wait for the checkout form to render."""
+        self.page.locator(self.FIRST_NAME_INPUT).first.wait_for(
+            state="visible", timeout=timeout
+        )
+
+    def wait_for_complete(self, timeout: int = TIMEOUT * 1000):
+        """Wait for the order confirmation page to render."""
+        self.page.locator(self.COMPLETE_HEADER).first.wait_for(
+            state="visible", timeout=timeout
+        )
+
+    def wait_for_overview(self, timeout: int = TIMEOUT * 1000):
+        """Wait for the checkout overview (step two) to render."""
+        self.page.locator(self.FINISH_BUTTON).first.wait_for(
+            state="visible", timeout=timeout
+        )
 
     def fill_shipping_info(self, first_name: str, last_name: str, postal_code: str):
         self.fill(self.FIRST_NAME_INPUT, first_name)
@@ -44,6 +63,7 @@ class CheckoutPage(BasePage):
         return self.get_text(self.SUMMARY_TOTAL)
 
     def get_complete_header(self) -> str:
+        self.wait_for_complete()
         return self.get_text(self.COMPLETE_HEADER)
 
     def get_page_title(self) -> str:
