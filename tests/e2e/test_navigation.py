@@ -11,8 +11,8 @@ class TestNavigation:
     def test_unauthenticated_redirect(self, page):
         """Verify unauthenticated users see the login page when accessing protected routes."""
         from config.settings import UI_BASE_URL
-        page.goto(f"{UI_BASE_URL}/inventory.html")
-        page.wait_for_load_state("networkidle")
+        page.goto(f"{UI_BASE_URL}/inventory.html", wait_until="domcontentloaded")
+        page.locator("#login-button").first.wait_for(state="visible")
         is_on_login = page.url.rstrip("/") == UI_BASE_URL
         has_login_form = page.locator("#login-button").is_visible()
         has_error = page.locator("[data-test='error']").is_visible()
