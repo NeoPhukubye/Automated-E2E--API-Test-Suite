@@ -19,7 +19,11 @@ class CartPage(BasePage):
         self.wait_until_ready()
 
     def wait_until_ready(self, timeout: int = TIMEOUT * 1000):
-        """Wait for the cart page title to render."""
+        """Wait for the cart page URL and title to render."""
+        self.page.wait_for_url("**/cart.html", timeout=timeout)
+        self.page.locator(self.CHECKOUT_BUTTON).wait_for(
+            state="visible", timeout=timeout
+        )
         self.page.locator(self.PAGE_TITLE).first.wait_for(
             state="visible", timeout=timeout
         )
