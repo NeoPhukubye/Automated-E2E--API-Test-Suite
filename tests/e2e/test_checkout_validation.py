@@ -55,6 +55,7 @@ class TestCheckoutValidation:
             data.first_name(), data.last_name(), data.postal_code()
         )
         checkout.continue_checkout()
+        checkout.wait_for_overview()
         assert "Checkout: Overview" in checkout.get_page_title()
 
     @allure.severity(allure.severity_level.NORMAL)
