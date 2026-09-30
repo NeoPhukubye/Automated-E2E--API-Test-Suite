@@ -1,4 +1,5 @@
 from pages.base_page import BasePage
+from config.settings import TIMEOUT
 
 
 class ProductPage(BasePage):
@@ -10,6 +11,12 @@ class ProductPage(BasePage):
     ADD_TO_CART_BUTTON = "[data-test^='add-to-cart']"
     REMOVE_BUTTON = "[data-test^='remove']"
     BACK_BUTTON = "#back-to-products"
+
+    def wait_until_ready(self, timeout: int = TIMEOUT * 1000):
+        """Wait for the product detail container to render."""
+        self.page.locator(self.PRODUCT_NAME).first.wait_for(
+            state="visible", timeout=timeout
+        )
 
     def get_product_name(self) -> str:
         return self.get_text(self.PRODUCT_NAME)
