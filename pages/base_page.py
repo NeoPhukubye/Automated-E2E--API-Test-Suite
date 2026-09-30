@@ -11,9 +11,8 @@ class BasePage:
         self.page = page
 
     def navigate(self, path: str = ""):
-        """Navigate to the given path and wait for network idle."""
-        self.page.goto(path)
-        self.page.wait_for_load_state("networkidle")
+        """Navigate to the given path and wait for the DOM to be ready."""
+        self.page.goto(path, wait_until="domcontentloaded")
 
     def get_title(self) -> str:
         """Return the page title."""
