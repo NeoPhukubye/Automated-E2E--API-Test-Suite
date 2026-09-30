@@ -61,6 +61,7 @@ class HomePage(BasePage):
             state="visible", timeout=TIMEOUT * 1000
         )
         self.click(self.SHOPPING_CART_LINK)
+        self.page.wait_for_url("**/cart.html", timeout=TIMEOUT * 1000)
 
     def sort_products(self, value: str):
         self.wait_until_ready()
