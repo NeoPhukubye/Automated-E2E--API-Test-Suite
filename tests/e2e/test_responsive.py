@@ -60,13 +60,15 @@ class TestResponsive:
     @allure.story("Cart Accessibility")
     def test_cart_accessible_all_viewports(self, page):
         """Verify cart link is visible at all viewport sizes."""
+        home = HomePage(page)
         for width, height, _ in self.VIEWPORTS:
             page.set_viewport_size({"width": width, "height": height})
             login = LoginPage(page)
             login.navigate()
             login.login("standard_user", "secret_sauce")
             page.wait_for_url("**/inventory.html")
-            assert page.locator(".shopping_cart_link").is_visible()
+            home.wait_until_ready()
+            assert page.locator(home.SHOPPING_CART_LINK).is_visible()
             page.goto("about:blank")
 
     def _login_and_verify(self, page):
@@ -76,4 +78,5 @@ class TestResponsive:
         login.login("standard_user", "secret_sauce")
         page.wait_for_url("**/inventory.html")
         home = HomePage(page)
+        home.wait_until_ready()
         assert home.get_product_count() == 6
