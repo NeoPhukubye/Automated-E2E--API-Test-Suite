@@ -26,6 +26,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Diagnose API connectivity
+        run: |
+          python -c "
+          import requests
+          url = '\$BASE_URL/products'
+          try:
+              resp = requests.get(url, timeout=10, headers={'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'})
+              print(f'Status: {resp.status_code}')
+              print(f'Content-Type: {resp.headers.get(\"Content-Type\")}')
+              print(f'Body (first 300 chars): {resp.text[:300]}')
+          except Exception as e:
+              print(f'Error: {e}')
+          "
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+
       - name: Verify test collection
         run: python -m pytest tests/api/ --collect-only -p no:playwright
 
