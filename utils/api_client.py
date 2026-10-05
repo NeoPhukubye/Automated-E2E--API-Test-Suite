@@ -20,7 +20,7 @@ class APIClient:
     """Base HTTP client wrapping requests for the FakeStore API.
 
     Provides automatic retries (3 attempts with exponential backoff for
-    429/5xx), configurable timeouts, and session management.
+    403/429/5xx), configurable timeouts, and session management.
     """
 
     def __init__(self, base_url: str = BASE_URL, timeout: int = 30):
@@ -29,13 +29,16 @@ class APIClient:
         self.session = requests.Session()
         self.session.headers.update({
             "Content-Type": "application/json",
+            "Accept": "application/json",
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
         })
 
         retry_strategy = Retry(
             total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
+            backoff_factor=2,
+            status_forcelist=[403, 429, 500, 502, 503, 504],
+            allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE"],
+            respect_retry_after_header=True,
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.session.mount("http://", adapter)
