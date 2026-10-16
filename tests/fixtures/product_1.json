@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "title": "Test Product",
+  "price": 10.99,
+  "description": "Test description",
+  "category": "electronics",
+  "image": "https://example.com/image.jpg",
+  "rating": {"rate": 4.5, "count": 10}
+}
