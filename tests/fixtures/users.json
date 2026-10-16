@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "email": "john@example.com",
+    "username": "johnd",
+    "password": "m38rmF$",
+    "name": {"firstname": "John", "lastname": "Doe"},
+    "address": {"city": "New York", "street": "123 St", "number": 3, "zipcode": "10001", "geolocation": {"lat": "40.7128", "long": "-74.0060"}},
+    "phone": "1-234-567-890"
+  }
+]
