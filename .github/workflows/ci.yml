@@ -29,8 +29,9 @@ jobs:
       - name: Diagnose API connectivity
         run: |
           python -c "
+          import os
           import requests
-          url = '\$BASE_URL/products'
+          url = os.environ.get('BASE_URL', 'https://fakestoreapi.com') + '/products'
           try:
               resp = requests.get(url, timeout=10, headers={'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'})
               print(f'Status: {resp.status_code}')
