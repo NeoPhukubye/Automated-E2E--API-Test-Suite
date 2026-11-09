@@ -111,3 +111,39 @@ class BasePage:
     def screenshot(self, path: Optional[str] = None):
         """Take a screenshot of the current page."""
         return self.page.screenshot(path=path)
+
+    def get_count(self, selector: str) -> int:
+        """Return the count of elements matching the selector."""
+        return self.page.locator(selector).count()
+
+    def wait_for_element(self, selector: str, state: str = "visible", timeout: Optional[int] = None):
+        """Wait for an element to reach a specific state."""
+        self.page.locator(selector).wait_for(state=state, timeout=timeout)
+
+    def scroll_into_view(self, selector: str):
+        """Scroll an element into view."""
+        self.page.locator(selector).scroll_into_view_if_needed()
+
+    def get_value(self, selector: str) -> str:
+        """Get the value of an input element."""
+        return self.page.locator(selector).input_value() or ""
+
+    def clear(self, selector: str):
+        """Clear an input field."""
+        self.page.locator(selector).clear()
+
+    def double_click(self, selector: str):
+        """Double click an element."""
+        self.page.locator(selector).dblclick()
+
+    def right_click(self, selector: str):
+        """Right click an element."""
+        self.page.locator(selector).click(button="right")
+
+    def drag_and_drop(self, source_selector: str, target_selector: str):
+        """Drag and drop from source to target."""
+        self.page.locator(source_selector).drag_to(self.page.locator(target_selector))
+
+    def wait_for_function(self, function: str, timeout: Optional[int] = None):
+        """Wait for a JavaScript function to return truthy value."""
+        self.page.wait_for_function(function, timeout=timeout)
