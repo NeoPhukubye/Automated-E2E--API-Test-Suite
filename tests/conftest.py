@@ -7,7 +7,7 @@ from urllib.parse import urlparse, parse_qs
 
 import pytest
 import allure
-import requests_mock
+import requests_mock as requests_mock_module
 from utils.api_client import APIClient
 from utils.test_data import DataGenerator
 from config.settings import UI_BASE_URL, HEADLESS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, BASE_URL, VERIFY_SSL
@@ -121,8 +121,14 @@ def _load_fixture(name):
 
 @pytest.fixture(autouse=True)
 def mock_external_api(requests_mock):
-    """Mock external API calls in CI environments."""
-    if os.getenv("GITHUB_ACTIONS", "").lower() in ("true",) or os.getenv("CI", "").lower() in ("true",):
+    """Mock external API calls in CI environments or when MOCK_API is set."""
+    # Allow enabling mock locally via MOCK_API=true
+    should_mock = (
+        os.getenv("GITHUB_ACTIONS", "").lower() in ("true",)
+        or os.getenv("CI", "").lower() in ("true",)
+        or os.getenv("MOCK_API", "").lower() in ("true", "1", "yes")
+    )
+    if should_mock:
         base = os.getenv("BASE_URL", "https://fakestoreapi.com")
         products = _load_fixture("products")
         users = _load_fixture("users")
@@ -132,7 +138,9 @@ def mock_external_api(requests_mock):
         categories = _load_fixture("categories")
 
         def _mock_get(url, request):
-            parsed = urlparse(url)
+            # url can be a PreparedRequest, extract the URL string
+            url_str = url.url if hasattr(url, 'url') else str(url)
+            parsed = urlparse(url_str)
             query = parse_qs(parsed.query)
             path = parsed.path
 
@@ -165,32 +173,61 @@ def mock_external_api(requests_mock):
             return {}
 
         def _mock_post(url, request):
-            if "/auth/login" in url:
+            url_str = url.url if hasattr(url, 'url') else str(url)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            if path == "/auth/login":
                 return login
-            elif "/products" in url:
+            elif path == "/products":
                 return {"id": 21, **product1}
+            elif path == "/users":
+                return {"id": 11, **_load_fixture("users")[0]} if _load_fixture("users") else {}
+            elif path == "/carts":
+                return {"id": 21, "userId": 1, "date": "2024-01-01", "products": []}
             return {}
 
         def _mock_put(url, request):
-            if "/products/" in url:
+            url_str = url.url if hasattr(url, 'url') else str(url)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            if path.startswith("/products/"):
                 return product1
+            elif path.startswith("/users/"):
+                return _load_fixture("users")[0] if _load_fixture("users") else {}
+            elif path.startswith("/carts/"):
+                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
             return {}
 
         def _mock_patch(url, request):
-            if "/products/" in url:
+            url_str = url.url if hasattr(url, 'url') else str(url)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            if path.startswith("/products/"):
                 return product1
+            elif path.startswith("/users/"):
+                return _load_fixture("users")[0] if _load_fixture("users") else {}
+            elif path.startswith("/carts/"):
+                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
             return {}
 
         def _mock_delete(url, request):
-            if "/products/" in url:
+            url_str = url.url if hasattr(url, 'url') else str(url)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            if path.startswith("/products/"):
                 return product1
+            elif path.startswith("/users/"):
+                return _load_fixture("users")[0] if _load_fixture("users") else {}
+            elif path.startswith("/carts/"):
+                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
             return {}
 
-        requests_mock.get(requests_mock.ANY, json=_mock_get)
-        requests_mock.post(requests_mock.ANY, json=_mock_post)
-        requests_mock.put(requests_mock.ANY, json=_mock_put)
-        requests_mock.patch(requests_mock.ANY, json=_mock_patch)
-        requests_mock.delete(requests_mock.ANY, json=_mock_delete)
+        # Use the imported requests_mock module for ANY constant
+        requests_mock.get(requests_mock_module.ANY, json=_mock_get)
+        requests_mock.post(requests_mock_module.ANY, json=_mock_post)
+        requests_mock.put(requests_mock_module.ANY, json=_mock_put)
+        requests_mock.patch(requests_mock_module.ANY, json=_mock_patch)
+        requests_mock.delete(requests_mock_module.ANY, json=_mock_delete)
 
         yield
     else:
