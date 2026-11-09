@@ -96,6 +96,22 @@ AUTH_TOKEN_SCHEMA = {
     },
 }
 
+LOGIN_RESPONSE_SCHEMA = {
+    "type": "object",
+    "required": ["id", "username", "email", "firstName", "lastName"],
+    "properties": {
+        "id": {"type": "number"},
+        "username": {"type": "string", "minLength": 1},
+        "email": {"type": "string", "format": "email"},
+        "firstName": {"type": "string", "minLength": 1},
+        "lastName": {"type": "string", "minLength": 1},
+        "gender": {"type": "string"},
+        "image": {"type": "string", "format": "uri"},
+        "token": {"type": "string", "minLength": 1},
+    },
+    "additionalProperties": False,
+}
+
 
 def validate_product_schema(product: dict) -> None:
     """Validate a product response against the JSON Schema contract."""
@@ -115,6 +131,11 @@ def validate_user_schema(user: dict) -> None:
 def validate_auth_token_schema(response: dict) -> None:
     """Validate an auth token response against the JSON Schema contract."""
     validate(instance=response, schema=AUTH_TOKEN_SCHEMA)
+
+
+def validate_login_response_schema(response: dict) -> None:
+    """Validate a login response against the JSON Schema contract."""
+    validate(instance=response, schema=LOGIN_RESPONSE_SCHEMA)
 
 
 def validate_products(products: List[dict]) -> None:
@@ -160,7 +181,7 @@ def get_schema_for_type(entity_type: str) -> Optional[Dict[str, Any]]:
     """Return the JSON schema for a given entity type.
 
     Args:
-        entity_type: One of 'product', 'cart', 'user', 'auth_token'.
+        entity_type: One of 'product', 'cart', 'user', 'auth_token', 'login_response'.
 
     Returns:
         The JSON schema dict, or None if the type is unknown.
@@ -170,5 +191,6 @@ def get_schema_for_type(entity_type: str) -> Optional[Dict[str, Any]]:
         "cart": CART_SCHEMA,
         "user": USER_SCHEMA,
         "auth_token": AUTH_TOKEN_SCHEMA,
+        "login_response": LOGIN_RESPONSE_SCHEMA,
     }
     return schemas.get(entity_type)
