@@ -1,17 +1,63 @@
-from utils.api_client import APIClient
+"""Shared utilities package for the test suite."""
+
+from utils.api_client import APIClient, APIClientError, APIClientRequestError
 from utils.schema_validator import (
+    PRODUCT_SCHEMA,
+    CART_SCHEMA,
+    USER_SCHEMA,
+    AUTH_TOKEN_SCHEMA,
+    LOGIN_RESPONSE_SCHEMA,
     validate_product_schema,
     validate_cart_schema,
     validate_user_schema,
     validate_auth_token_schema,
+    validate_login_response_schema,
+    validate_products,
+    validate_carts,
+    validate_users,
+    get_schema_for_type,
 )
 from utils.test_data import DataGenerator
+from utils.assertions import (
+    assert_status_code,
+    assert_json_response,
+    assert_schema_valid,
+    assert_list_not_empty,
+    assert_has_keys,
+    assert_field_type,
+    assert_field_value,
+    assert_response_time,
+    assert_content_type,
+    assert_headers_present,
+)
 
 __all__ = [
     "APIClient",
+    "APIClientError",
+    "APIClientRequestError",
+    "PRODUCT_SCHEMA",
+    "CART_SCHEMA",
+    "USER_SCHEMA",
+    "AUTH_TOKEN_SCHEMA",
+    "LOGIN_RESPONSE_SCHEMA",
     "validate_product_schema",
     "validate_cart_schema",
     "validate_user_schema",
     "validate_auth_token_schema",
+    "validate_login_response_schema",
+    "validate_products",
+    "validate_carts",
+    "validate_users",
+    "get_schema_for_type",
     "DataGenerator",
+    "assert_status_code",
+    "assert_json_response",
+    "assert_schema_valid",
+    "assert_list_not_empty",
+    "assert_has_keys",
+    "assert_field_type",
+    "assert_field_value",
+    "assert_response_time",
+    "assert_content_type",
+    "assert_headers_present",
 ]
