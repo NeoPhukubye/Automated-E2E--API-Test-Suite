@@ -1,16 +1,17 @@
 """Randomized test data generation using Faker."""
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 from faker import Faker
 
 
 class DataGenerator:
     """Generates randomized test data using Faker for test isolation."""
 
-    def __init__(self, locale: str = "en_US"):
+    def __init__(self, locale: str = "en_US", seed: Optional[int] = 42):
         self._fake = Faker(locale)
         # Seed for reproducibility in CI
-        self._fake.seed_instance(42)
+        if seed is not None:
+            self._fake.seed_instance(seed)
 
     def first_name(self) -> str:
         return self._fake.first_name()
@@ -117,4 +118,18 @@ class DataGenerator:
                 {"productId": pid, "quantity": qty}
                 for pid, qty in zip(product_ids, quantities)
             ],
+        }
+
+    def generate_login_credentials(self) -> Dict[str, str]:
+        """Generate valid login credentials for the FakeStore API."""
+        return {
+            "username": "mor_2314",
+            "password": "83r5^_",
+        }
+
+    def generate_invalid_login_credentials(self) -> Dict[str, str]:
+        """Generate invalid login credentials for negative testing."""
+        return {
+            "username": self.username(),
+            "password": self.password(),
         }
