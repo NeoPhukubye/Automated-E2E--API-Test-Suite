@@ -5,7 +5,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.models import Response
 from urllib3.util.retry import Retry
-from config.settings import BASE_URL
+from config.settings import BASE_URL, API_TIMEOUT, RETRIES, VERIFY_SSL
 
 
 class APIClientError(Exception):
@@ -19,22 +19,30 @@ class APIClientRequestError(APIClientError):
 class APIClient:
     """Base HTTP client wrapping requests for the FakeStore API.
 
-    Provides automatic retries (3 attempts with exponential backoff for
-    403/429/5xx), configurable timeouts, and session management.
+    Provides automatic retries (configurable attempts with exponential backoff for
+    403/429/5xx), configurable timeouts, SSL verification, and session management.
     """
 
-    def __init__(self, base_url: str = BASE_URL, timeout: int = 30):
+    def __init__(
+        self,
+        base_url: str = BASE_URL,
+        timeout: int = API_TIMEOUT,
+        retries: int = RETRIES,
+        verify_ssl: bool = VERIFY_SSL,
+    ):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self.verify_ssl = verify_ssl
         self.session = requests.Session()
         self.session.headers.update({
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
         })
+        self.session.verify = verify_ssl
 
         retry_strategy = Retry(
-            total=3,
+            total=retries,
             backoff_factor=2,
             status_forcelist=[403, 429, 500, 502, 503, 504],
             allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE"],
@@ -80,6 +88,10 @@ class APIClient:
         """Perform a DELETE request to the given endpoint."""
         kwargs.setdefault("timeout", self.timeout)
         return self.session.delete(f"{self.base_url}{endpoint}", **kwargs)
+
+    def get_full_url(self, endpoint: str) -> str:
+        """Return the full URL for an endpoint."""
+        return f"{self.base_url}{endpoint}"
 
     def close(self) -> None:
         """Close the underlying session."""
