@@ -19,7 +19,7 @@ Comprehensive end-to-end and API automated test framework targeting the [FakeSto
 
 ```
 ├── config/                  # Configuration and environment settings
-│   └── settings.py          # Loads BASE_URL, UI_BASE_URL, HEADLESS from .env
+│   └── settings.py          # Loads all settings from .env (see Configuration)
 ├── pages/                   # Page Object Models for E2E tests
 │   ├── base_page.py         # Shared browser interaction methods
 │   ├── login_page.py        # Sauce Demo login page
@@ -80,6 +80,24 @@ python -m playwright install --with-deps chromium
 # Configure environment
 cp .env.example .env
 ```
+
+## Configuration
+
+All settings are loaded from environment variables (`.env` file). See `.env.example` for all available options:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BASE_URL` | `https://fakestoreapi.com` | Base URL for API tests |
+| `UI_BASE_URL` | `https://www.saucedemo.com` | Base URL for E2E tests |
+| `HEADLESS` | `true` | Run browser in headless mode |
+| `BROWSER` | `chromium` | Browser to use (chromium, firefox, webkit) |
+| `TIMEOUT` | `30` | Default timeout in seconds |
+| `RETRIES` | `3` | Number of retry attempts for failed requests |
+| `VIEWPORT_WIDTH` | `1280` | Browser viewport width |
+| `VIEWPORT_HEIGHT` | `720` | Browser viewport height |
+| `SLOW_MO` | `0` | Slow down Playwright operations by N ms (debugging) |
+| `API_TIMEOUT` | `30` | API request timeout in seconds |
+| `VERIFY_SSL` | `true` | Verify SSL certificates for API requests |
 
 ## Running Tests
 
@@ -174,22 +192,23 @@ pytest --html=reports/report.html --self-contained-html
 ## Architecture
 
 ### API Testing Layer
-- **APIClient** (`utils/api_client.py`): Centralized HTTP client with automatic retries (3 attempts with exponential backoff for 429/5xx), configurable timeouts, and session management.
-- **Schema Validation** (`utils/schema_validator.py`): JSON Schema contracts enforcing response structure for products, carts, users, and auth tokens.
-- **Data Generation** (`utils/test_data.py`): Faker-powered random data for test isolation.
+- **APIClient** (`utils/api_client.py`): Centralized HTTP client with automatic retries (configurable attempts with exponential backoff for 403/429/5xx), configurable timeouts, SSL verification, and session management.
+- **Schema Validation** (`utils/schema_validator.py`): JSON Schema contracts enforcing response structure for products, carts, users, auth tokens, and login responses.
+- **Data Generation** (`utils/test_data.py`): Faker-powered random data for test isolation with reproducible seeding.
 
 ### E2E Testing Layer
 - **Page Object Model**: Each page has a dedicated class encapsulating selectors and interactions, reducing test brittleness and duplication.
+- **BasePage** (`pages/base_page.py`): Rich set of browser interaction utilities (click, fill, scroll, drag-and-drop, wait helpers).
 - **Auto-login Fixture**: `logged_in_page` fixture handles authentication before tests that require it.
 - **Failure Handling**: Automatic screenshot capture on test failure, attached to Allure reports.
 - **Responsive Testing**: Viewport parameterization for desktop, tablet, and mobile breakpoints.
 
 ### CI/CD Pipeline
 The GitHub Actions workflow runs API and E2E tests in separate parallel jobs:
-- **api-tests**: Runs without Playwright overhead, includes coverage and retry logic.
+- **api-tests**: Runs across Python 3.10, 3.11, 3.12 without Playwright overhead, includes coverage and retry logic.
 - **e2e-tests**: Installs Chromium, captures screenshots on failure, uploads Allure results.
 
-Both jobs upload test artifacts (HTML reports, coverage, Allure results, failure screenshots).
+Both jobs upload test artifacts (HTML reports, coverage, Allure results, failure screenshots) with 7-day retention.
 
 ## Target Applications
 
