@@ -10,17 +10,22 @@ env:
   BASE_URL: https://fakestoreapi.com
   UI_BASE_URL: https://www.saucedemo.com
   HEADLESS: "true"
+  VERIFY_SSL: "true"
 
 jobs:
   api-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
 
       - name: Install dependencies
@@ -59,16 +64,18 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-reports
+          name: api-test-reports-py${{ matrix.python-version }}
           path: |
             allure-results/api/
             reports/api-report.html
             reports/coverage-html/
             reports/coverage.xml
             reports/api-junit.xml
+          retention-days: 7
 
   e2e-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -116,3 +123,4 @@ jobs:
             reports/e2e-coverage-html/
             reports/screenshots/
             reports/e2e-junit.xml
+          retention-days: 7
