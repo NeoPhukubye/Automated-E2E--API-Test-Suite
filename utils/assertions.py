@@ -5,18 +5,19 @@ import allure
 from jsonschema import ValidationError
 
 
-def assert_status_code(response, expected: int, message: str = ""):
+def assert_status_code(response, expected: int, message: str = "", accepted_codes: list = None):
     """Assert response status code with detailed failure message."""
     actual = response.status_code
-    msg = message or f"Expected status {expected}, got {actual}"
-    if actual != expected:
+    valid_codes = [expected] + (accepted_codes or [])
+    msg = message or f"Expected status {valid_codes}, got {actual}"
+    if actual not in valid_codes:
         try:
             body = response.json()
         except Exception:
             body = response.text
         allure.attach(str(body), name="Response Body", attachment_type=allure.attachment_type.JSON)
         allure.attach(str(actual), name="Actual Status", attachment_type=allure.attachment_type.TEXT)
-    assert actual == expected, msg
+    assert actual in valid_codes, msg
 
 
 def assert_json_response(response, message: str = ""):
