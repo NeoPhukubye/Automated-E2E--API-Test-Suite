@@ -150,6 +150,9 @@ def mock_external_api(requests_mock):
         login = _load_fixture("login")
         categories = _load_fixture("categories")
 
+        # Use a mutable list for carts to track created/updated ones
+        carts_state = list(carts)
+
         def _mock_get(request, context):
             # request is a _RequestObjectProxy, extract the URL string
             url_str = request.url if hasattr(request, 'url') else str(request)

@@ -3,6 +3,7 @@
 import pytest
 import allure
 from utils.schema_validator import validate_cart_schema
+from utils.assertions import assert_status_code, assert_json_response, assert_list_not_empty
 
 
 @pytest.mark.api
@@ -60,8 +61,8 @@ class TestCartsRead:
     @allure.story("User Carts")
     def test_get_user_carts(self, api):
         response = api.get("/carts/user/1")
-        assert response.status_code == 200
-        carts = response.json()
+        assert_status_code(response, 200)
+        carts = assert_json_response(response)
         assert isinstance(carts, list)
         for cart in carts:
             assert cart["userId"] == 1

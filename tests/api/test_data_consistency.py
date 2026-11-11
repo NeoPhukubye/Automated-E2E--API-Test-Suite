@@ -1,5 +1,6 @@
 import pytest
 import allure
+from utils.assertions import assert_json_response
 
 
 @pytest.mark.api
@@ -11,7 +12,7 @@ class TestProductDataConsistency:
     @allure.story("Unique IDs")
     def test_all_products_have_unique_ids(self, api):
         response = api.get("/products")
-        products = response.json()
+        products = assert_json_response(response)
         ids = [p["id"] for p in products]
         assert len(ids) == len(set(ids)), "Duplicate product IDs found"
 
@@ -19,7 +20,7 @@ class TestProductDataConsistency:
     @allure.story("Data Validation")
     def test_all_products_have_positive_prices(self, api):
         response = api.get("/products")
-        products = response.json()
+        products = assert_json_response(response)
         for product in products:
             assert product["price"] > 0, f"Product {product['id']} has non-positive price"
 
@@ -27,7 +28,7 @@ class TestProductDataConsistency:
     @allure.story("Data Validation")
     def test_all_products_have_non_empty_titles(self, api):
         response = api.get("/products")
-        products = response.json()
+        products = assert_json_response(response)
         for product in products:
             assert product["title"].strip(), f"Product {product['id']} has empty title"
 
@@ -35,10 +36,10 @@ class TestProductDataConsistency:
     @allure.story("Referential Integrity")
     def test_all_products_have_valid_categories(self, api):
         cat_resp = api.get("/products/categories")
-        valid_categories = cat_resp.json()
+        valid_categories = assert_json_response(cat_resp)
 
         prod_resp = api.get("/products")
-        products = prod_resp.json()
+        products = assert_json_response(prod_resp)
         for product in products:
             assert product["category"] in valid_categories, (
                 f"Product {product['id']} has invalid category: {product['category']}"
@@ -48,7 +49,7 @@ class TestProductDataConsistency:
     @allure.story("Data Validation")
     def test_all_products_have_image_urls(self, api):
         response = api.get("/products")
-        products = response.json()
+        products = assert_json_response(response)
         for product in products:
             assert product["image"].startswith("http"), (
                 f"Product {product['id']} has invalid image URL"
@@ -58,15 +59,15 @@ class TestProductDataConsistency:
     @allure.story("Referential Integrity")
     def test_product_count_matches_category_totals(self, api):
         all_resp = api.get("/products")
-        all_products = all_resp.json()
+        all_products = assert_json_response(all_resp)
 
         cat_resp = api.get("/products/categories")
-        categories = cat_resp.json()
+        categories = assert_json_response(cat_resp)
 
         category_total = 0
         for category in categories:
             resp = api.get(f"/products/category/{category}")
-            category_total += len(resp.json())
+            category_total += len(assert_json_response(resp))
 
         assert category_total == len(all_products)
 

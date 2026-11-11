@@ -54,8 +54,7 @@ class TestProductsRead:
         response = api.get("/products", params={"limit": 5})
         assert_status_code(response, 200)
         products = assert_json_response(response)
-        # Fixture only has 2 products
-        assert len(products) == 2
+        assert len(products) == 5
 
     @allure.severity(allure.severity_level.NORMAL)
     @allure.story("Sorting")
@@ -83,8 +82,7 @@ class TestProductsRead:
         response = api.get("/products", params={"limit": 3, "sort": "asc"})
         assert_status_code(response, 200)
         products = assert_json_response(response)
-        # Fixture only has 2 products
-        assert len(products) == 2
+        assert len(products) == 3
         ids = [p["id"] for p in products]
         assert ids == sorted(ids)
 
