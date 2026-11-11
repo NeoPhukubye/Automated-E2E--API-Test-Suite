@@ -16,5 +16,95 @@
     "category": "jewelry",
     "image": "https://example.com/image2.jpg",
     "rating": {"rate": 4.0, "count": 5}
+  },
+  {
+    "id": 3,
+    "title": "Test Product 3",
+    "price": 30.5,
+    "description": "Test description 3",
+    "category": "men's clothing",
+    "image": "https://example.com/image3.jpg",
+    "rating": {"rate": 3.5, "count": 8}
+  },
+  {
+    "id": 4,
+    "title": "Test Product 4",
+    "price": 40.99,
+    "description": "Test description 4",
+    "category": "women's clothing",
+    "image": "https://example.com/image4.jpg",
+    "rating": {"rate": 4.8, "count": 12}
+  },
+  {
+    "id": 5,
+    "title": "Test Product 5",
+    "price": 50.0,
+    "description": "Test description 5",
+    "category": "electronics",
+    "image": "https://example.com/image5.jpg",
+    "rating": {"rate": 4.2, "count": 6}
+  },
+  {
+    "id": 6,
+    "title": "Test Product 6",
+    "price": 60.25,
+    "description": "Test description 6",
+    "category": "jewelry",
+    "image": "https://example.com/image6.jpg",
+    "rating": {"rate": 3.8, "count": 9}
+  },
+  {
+    "id": 7,
+    "title": "Test Product 7",
+    "price": 70.99,
+    "description": "Test description 7",
+    "category": "men's clothing",
+    "image": "https://example.com/image7.jpg",
+    "rating": {"rate": 4.6, "count": 15}
+  },
+  {
+    "id": 8,
+    "title": "Test Product 8",
+    "price": 80.5,
+    "description": "Test description 8",
+    "category": "women's clothing",
+    "image": "https://example.com/image8.jpg",
+    "rating": {"rate": 4.1, "count": 7}
+  },
+  {
+    "id": 9,
+    "title": "Test Product 9",
+    "price": 90.99,
+    "description": "Test description 9",
+    "category": "electronics",
+    "image": "https://example.com/image9.jpg",
+    "rating": {"rate": 3.9, "count": 11}
+  },
+  {
+    "id": 10,
+    "title": "Test Product 10",
+    "price": 100.0,
+    "description": "Test description 10",
+    "category": "jewelry",
+    "image": "https://example.com/image10.jpg",
+    "rating": {"rate": 4.7, "count": 13}
+  },
+  {
+    "id": 11,
+    "title": "Test Product 11",
+    "price": 110.5,
+    "description": "Test description 11",
+    "category": "men's clothing",
+    "image": "https://example.com/image11.jpg",
+    "rating": {"rate": 4.3, "count": 14}
+  },
+  {
+    "id": 12,
+    "title": "Test Product 12",
+    "price": 120.99,
+    "description": "Test description 12",
+    "category": "women's clothing",
+    "image": "https://example.com/image12.jpg",
+    "rating": {"rate": 4.4, "count": 16}
   }
 ]

@@ -7,5 +7,41 @@
     "name": {"firstname": "John", "lastname": "Doe"},
     "address": {"city": "New York", "street": "123 St", "number": 3, "zipcode": "10001", "geolocation": {"lat": "40.7128", "long": "-74.0060"}},
     "phone": "1-234-567-890"
+  },
+  {
+    "id": 2,
+    "email": "janet@example.com",
+    "username": "janet",
+    "password": "abcdef",
+    "name": {"firstname": "Janet", "lastname": "Doe"},
+    "address": {"city": "Los Angeles", "street": "456 Ave", "number": 7, "zipcode": "90001", "geolocation": {"lat": "34.0522", "long": "-118.2437"}},
+    "phone": "2-345-678-901"
+  },
+  {
+    "id": 3,
+    "email": "bob@example.com",
+    "username": "bobsmith",
+    "password": "password123",
+    "name": {"firstname": "Bob", "lastname": "Smith"},
+    "address": {"city": "Chicago", "street": "789 Rd", "number": 12, "zipcode": "60601", "geolocation": {"lat": "41.8781", "long": "-87.6298"}},
+    "phone": "3-456-789-012"
+  },
+  {
+    "id": 4,
+    "email": "alice@example.com",
+    "username": "alice_w",
+    "password": "securePass!",
+    "name": {"firstname": "Alice", "lastname": "Johnson"},
+    "address": {"city": "Houston", "street": "321 Ln", "number": 45, "zipcode": "77001", "geolocation": {"lat": "29.7604", "long": "-95.3698"}},
+    "phone": "4-567-890-123"
+  },
+  {
+    "id": 5,
+    "email": "charlie@example.com",
+    "username": "charlie_b",
+    "password": "myPass123",
+    "name": {"firstname": "Charlie", "lastname": "Brown"},
+    "address": {"city": "Phoenix", "street": "654 St", "number": 78, "zipcode": "85001", "geolocation": {"lat": "33.4484", "long": "-112.0740"}},
+    "phone": "5-678-901-234"
   }
 ]
