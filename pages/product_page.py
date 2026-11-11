@@ -11,6 +11,7 @@ class ProductPage(BasePage):
     ADD_TO_CART_BUTTON = "[data-test^='add-to-cart']"
     REMOVE_BUTTON = "[data-test^='remove']"
     BACK_BUTTON = "#back-to-products"
+    PRODUCT_IMAGE = ".inventory_item_img"
 
     def wait_until_ready(self, timeout: int = TIMEOUT * 1000):
         """Wait for the product detail container to render."""
@@ -26,6 +27,9 @@ class ProductPage(BasePage):
 
     def get_product_price(self) -> str:
         return self.get_text(self.PRODUCT_PRICE)
+
+    def get_image_src(self) -> str:
+        return self.page.locator(self.PRODUCT_IMAGE).first.get_attribute("src")
 
     def add_to_cart(self):
         self.click(self.ADD_TO_CART_BUTTON)
