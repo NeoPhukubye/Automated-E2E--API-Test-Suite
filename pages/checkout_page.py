@@ -16,6 +16,10 @@ class CheckoutPage(BasePage):
     SUMMARY_TOTAL = ".summary_total_label"
     COMPLETE_HEADER = ".complete-header"
     PAGE_TITLE = ".title"
+    ITEM_LABELS = "[data-test='item-label']"
+    PAYMENT_INFO = ".summary_payment_info"
+    SHIPPING_INFO = ".summary_shipping_info"
+    ITEM_COUNT = "[data-test='item-count']"
 
     def navigate(self, path: str = ""):
         super().navigate(self.URL)
@@ -68,3 +72,17 @@ class CheckoutPage(BasePage):
 
     def get_page_title(self) -> str:
         return self.get_text(self.PAGE_TITLE)
+
+    def get_item_labels(self) -> str:
+        labels = self.page.locator(self.ITEM_LABELS)
+        count = labels.count()
+        return "\n".join([labels.nth(i).inner_text() for i in range(count)])
+
+    def get_item_count(self) -> int:
+        return self.page.locator(self.ITEM_COUNT).count()
+
+    def get_payment_info(self) -> str:
+        return self.get_text(self.PAYMENT_INFO)
+
+    def get_shipping_info(self) -> str:
+        return self.get_text(self.SHIPPING_INFO)

@@ -15,7 +15,11 @@ class HomePage(BasePage):
     SHOPPING_CART_LINK = ".shopping_cart_link"
     SORT_DROPDOWN = "[data-test='product-sort-container']"
     BURGER_MENU = "#react-burger-menu-btn"
+    BURGER_MENU_CONTAINER = ".bm-menu"
+    BURGER_MENU_LINKS = "#nav-list a"
     PAGE_TITLE = ".title"
+    FOOTER = "#footer"
+    SOCIAL_LINKS = ".footer a"
 
     def navigate(self, path: str = ""):
         super().navigate(self.URL)
@@ -74,3 +78,27 @@ class HomePage(BasePage):
     def get_page_title(self) -> str:
         self.wait_until_ready()
         return self.get_text(self.PAGE_TITLE)
+
+    def click_burger_menu(self):
+        self.click(self.BURGER_MENU)
+
+    def is_burger_menu_visible(self) -> bool:
+        return self.page.locator(self.BURGER_MENU_CONTAINER).is_visible()
+
+    def get_burger_menu_links(self) -> list[str]:
+        return self.page.locator(self.BURGER_MENU_LINKS).all_text_contents()
+
+    def click_burger_menu_link(self, link_text: str):
+        self.page.get_by_role("link", name=link_text).click()
+
+    def click_logout(self):
+        self.click_burger_menu_link("Logout")
+
+    def click_cart_icon(self):
+        self.click(self.SHOPPING_CART_LINK)
+
+    def is_footer_visible(self) -> bool:
+        return self.page.locator(self.FOOTER).is_visible()
+
+    def get_social_link_count(self) -> int:
+        return self.page.locator(self.SOCIAL_LINKS).count()

@@ -119,6 +119,19 @@ def _load_fixture(name):
         return json.load(fh)
 
 
+def _get_request_body(request_proxy):
+    """Extract JSON body from a requests_mock _RequestObjectProxy."""
+    try:
+        body = request_proxy.body
+        if isinstance(body, bytes):
+            body = body.decode("utf-8")
+        if isinstance(body, str) and body:
+            return json.loads(body)
+    except Exception:
+        pass
+    return {}
+
+
 @pytest.fixture(autouse=True)
 def mock_external_api(requests_mock):
     """Mock external API calls in CI environments or when MOCK_API is set."""
@@ -137,97 +150,233 @@ def mock_external_api(requests_mock):
         login = _load_fixture("login")
         categories = _load_fixture("categories")
 
-        def _mock_get(url, request):
-            # url can be a PreparedRequest, extract the URL string
-            url_str = url.url if hasattr(url, 'url') else str(url)
+        def _mock_get(request, context):
+            # request is a _RequestObjectProxy, extract the URL string
+            url_str = request.url if hasattr(request, 'url') else str(request)
             parsed = urlparse(url_str)
             query = parse_qs(parsed.query)
             path = parsed.path
 
+            def _get_query(name, default=None):
+                val = query.get(name, [default])
+                return val[0] if val else default
+
             if path == "/products":
-                limit = int(query.get("limit", [len(products)])[0])
-                sort = query.get("sort", [""])[0]
-                result = products[:limit]
+                limit = int(_get_query("limit", len(products)))
+                sort = _get_query("sort", "")
+                result = list(products)
                 if sort == "desc":
-                    result = list(reversed(result))
-                return result
+                    result = sorted(result, key=lambda p: p["id"], reverse=True)
+                elif sort == "asc":
+                    result = sorted(result, key=lambda p: p["id"])
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return result[:limit]
             elif path.startswith("/products/category/"):
                 category = path.split("/")[-1]
+                # URL decode category (e.g., men%27s -> men's)
+                from urllib.parse import unquote
+                category = unquote(category)
                 filtered = [p for p in products if p.get("category") == category]
-                return filtered[:1] if filtered else [product1]
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return filtered if filtered else []
             elif path == "/products/categories":
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
                 return categories
             elif path.startswith("/products/"):
                 pid = path.split("/")[-1]
-                return next((p for p in products if str(p.get("id")) == pid), product1)
+                # Return 404 for non-numeric IDs
+                if not pid.isdigit():
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "Product not found"}
+                product = next((p for p in products if str(p.get("id")) == pid), None)
+                if product is None:
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "Product not found"}
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return product
             elif path == "/users":
-                return users
+                limit = int(_get_query("limit", len(users)))
+                sort = _get_query("sort", "")
+                result = list(users)
+                if sort == "desc":
+                    result = sorted(result, key=lambda u: u["id"], reverse=True)
+                elif sort == "asc":
+                    result = sorted(result, key=lambda u: u["id"])
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return result[:limit]
             elif path.startswith("/users/"):
                 uid = path.split("/")[-1]
-                return next((u for u in users if str(u.get("id")) == uid), users[0] if users else {})
+                # Return 404 for non-numeric IDs
+                if not uid.isdigit():
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "User not found"}
+                user = next((u for u in users if str(u.get("id")) == uid), None)
+                if user is None:
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "User not found"}
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return user
             elif path == "/carts":
-                return carts
+                limit = int(_get_query("limit", len(carts)))
+                sort = _get_query("sort", "")
+                startdate = _get_query("startdate", "")
+                enddate = _get_query("enddate", "")
+                result = list(carts)
+                if startdate or enddate:
+                    result = [
+                        c for c in result
+                        if (not startdate or c["date"] >= startdate)
+                        and (not enddate or c["date"] <= enddate)
+                    ]
+                if sort == "desc":
+                    result = sorted(result, key=lambda c: c["id"], reverse=True)
+                elif sort == "asc":
+                    result = sorted(result, key=lambda c: c["id"])
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return result[:limit]
+            elif path.startswith("/carts/user/"):
+                uid = path.split("/")[-1]
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return [c for c in carts if str(c.get("userId")) == uid]
             elif path.startswith("/carts/"):
                 cid = path.split("/")[-1]
-                return next((c for c in carts if str(c.get("id")) == cid), carts[0] if carts else {})
-            return {}
+                # Return 404 for non-numeric IDs
+                if not cid.isdigit():
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "Cart not found"}
+                cart = next((c for c in carts if str(c.get("id")) == cid), None)
+                if cart is None:
+                    context.status_code = 404
+                    context.headers["Content-Type"] = "application/json"
+                    return {"error": "Cart not found"}
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return cart
 
-        def _mock_post(url, request):
-            url_str = url.url if hasattr(url, 'url') else str(url)
+        def _mock_post(request, context):
+            url_str = request.url if hasattr(request, 'url') else str(request)
             parsed = urlparse(url_str)
             path = parsed.path
+            body = _get_request_body(request)
             if path == "/auth/login":
                 return login
             elif path == "/products":
-                return {"id": 21, **product1}
+                context.status_code = 201
+                context.headers["Content-Type"] = "application/json"
+                return {"id": 21, **body}
             elif path == "/users":
-                return {"id": 11, **_load_fixture("users")[0]} if _load_fixture("users") else {}
+                context.status_code = 201
+                context.headers["Content-Type"] = "application/json"
+                return {"id": 11, **body} if users else {}
             elif path == "/carts":
-                return {"id": 21, "userId": 1, "date": "2024-01-01", "products": []}
+                context.status_code = 201
+                context.headers["Content-Type"] = "application/json"
+                new_id = max([c["id"] for c in carts], default=0) + 1
+                return {"id": new_id, **body}
+            context.status_code = 200
+            context.headers["Content-Type"] = "application/json"
             return {}
 
-        def _mock_put(url, request):
-            url_str = url.url if hasattr(url, 'url') else str(url)
+        def _mock_put(request, context):
+            url_str = request.url if hasattr(request, 'url') else str(request)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            body = _get_request_body(request)
+            if path.startswith("/products/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**product1, **body}
+            elif path.startswith("/users/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**users[0], **body} if users else {}
+            elif path.startswith("/carts/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**carts[0], **body} if carts else {}
+            context.status_code = 200
+            context.headers["Content-Type"] = "application/json"
+            return {}
+
+        def _mock_patch(request, context):
+            url_str = request.url if hasattr(request, 'url') else str(request)
+            parsed = urlparse(url_str)
+            path = parsed.path
+            body = _get_request_body(request)
+            if path.startswith("/products/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**product1, **body}
+            elif path.startswith("/users/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**users[0], **body} if users else {}
+            elif path.startswith("/carts/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return {**carts[0], **body} if carts else {}
+            context.status_code = 200
+            context.headers["Content-Type"] = "application/json"
+            return {}
+
+        def _mock_delete(request, context):
+            url_str = request.url if hasattr(request, 'url') else str(request)
             parsed = urlparse(url_str)
             path = parsed.path
             if path.startswith("/products/"):
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
                 return product1
             elif path.startswith("/users/"):
-                return _load_fixture("users")[0] if _load_fixture("users") else {}
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return users[0] if users else {}
             elif path.startswith("/carts/"):
-                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return carts[0] if carts else {}
+            context.status_code = 200
+            context.headers["Content-Type"] = "application/json"
             return {}
 
-        def _mock_patch(url, request):
-            url_str = url.url if hasattr(url, 'url') else str(url)
-            parsed = urlparse(url_str)
-            path = parsed.path
-            if path.startswith("/products/"):
-                return product1
-            elif path.startswith("/users/"):
-                return _load_fixture("users")[0] if _load_fixture("users") else {}
-            elif path.startswith("/carts/"):
-                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
-            return {}
-
-        def _mock_delete(url, request):
-            url_str = url.url if hasattr(url, 'url') else str(url)
-            parsed = urlparse(url_str)
-            path = parsed.path
-            if path.startswith("/products/"):
-                return product1
-            elif path.startswith("/users/"):
-                return _load_fixture("users")[0] if _load_fixture("users") else {}
-            elif path.startswith("/carts/"):
-                return _load_fixture("carts")[0] if _load_fixture("carts") else {}
-            return {}
+        def _login_matcher(request, context):
+            """Matcher that returns 401 for invalid credentials."""
+            body = _get_request_body(request)
+            username = body.get("username", "")
+            password = body.get("password", "")
+            if username == "mor_2314" and password == "83r5^_":
+                context.status_code = 200
+                context.headers["Content-Type"] = "application/json"
+                return login
+            context.status_code = 401
+            context.headers["Content-Type"] = "application/json"
+            return {"error": "Invalid credentials"}
 
         # Use the imported requests_mock module for ANY constant
+        # Register specific matchers AFTER ANY so they take precedence
         requests_mock.get(requests_mock_module.ANY, json=_mock_get)
         requests_mock.post(requests_mock_module.ANY, json=_mock_post)
         requests_mock.put(requests_mock_module.ANY, json=_mock_put)
         requests_mock.patch(requests_mock_module.ANY, json=_mock_patch)
         requests_mock.delete(requests_mock_module.ANY, json=_mock_delete)
+        # Register login endpoint with credential-based matcher LAST for precedence
+        requests_mock.post(
+            f"{base}/auth/login",
+            json=_login_matcher,
+        )
 
         yield
     else:
