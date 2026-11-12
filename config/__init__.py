@@ -12,8 +12,9 @@ from config.settings import (
     SLOW_MO,
     API_TIMEOUT,
     VERIFY_SSL,
+    MOCK_API,
     get_setting,
-    get_all_settings,
+    get_settings,
     validate_settings,
 )
 
@@ -29,7 +30,8 @@ __all__ = [
     "SLOW_MO",
     "API_TIMEOUT",
     "VERIFY_SSL",
+    "MOCK_API",
     "get_setting",
-    "get_all_settings",
+    "get_settings",
     "validate_settings",
 ]

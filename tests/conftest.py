@@ -10,7 +10,7 @@ import allure
 import requests_mock as requests_mock_module
 from utils.api_client import APIClient
 from utils.test_data import DataGenerator
-from config.settings import UI_BASE_URL, HEADLESS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, BASE_URL, VERIFY_SSL
+from config.settings import UI_BASE_URL, HEADLESS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, BASE_URL, VERIFY_SSL, MOCK_API
 
 
 class ResponseStoringAPIClient:
@@ -135,14 +135,10 @@ def _get_request_body(request_proxy):
 @pytest.fixture(autouse=True)
 def mock_external_api(requests_mock):
     """Mock external API calls in CI environments or when MOCK_API is set."""
-    # Allow enabling mock locally via MOCK_API=true
-    should_mock = (
-        os.getenv("GITHUB_ACTIONS", "").lower() in ("true",)
-        or os.getenv("CI", "").lower() in ("true",)
-        or os.getenv("MOCK_API", "").lower() in ("true", "1", "yes")
-    )
+    # Use the MOCK_API setting from config
+    should_mock = MOCK_API
     if should_mock:
-        base = os.getenv("BASE_URL", "https://fakestoreapi.com")
+        base = BASE_URL
         products = _load_fixture("products")
         users = _load_fixture("users")
         carts = _load_fixture("carts")
