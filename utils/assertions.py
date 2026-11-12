@@ -1,11 +1,13 @@
 """Common assertion helpers for tests."""
 
-from typing import Any, Dict, List, Optional
 import allure
+from typing import Any, Dict, List, Optional, Union
 from jsonschema import ValidationError
 
 
-def assert_status_code(response, expected: int, message: str = "", accepted_codes: list = None):
+def assert_status_code(
+    response, expected: int, message: str = "", accepted_codes: list = None
+):
     """Assert response status code with detailed failure message."""
     actual = response.status_code
     valid_codes = [expected] + (accepted_codes or [])
@@ -92,3 +94,137 @@ def assert_headers_present(response, headers: List[str], message: str = ""):
     missing = [h for h in headers if h not in response.headers]
     msg = message or f"Missing headers: {missing}"
     assert not missing, msg
+
+
+def assert_field_exists(data: dict, field: str, message: str = ""):
+    """Assert a field exists in the data."""
+    msg = message or f"Field '{field}' not found in data"
+    assert field in data, msg
+
+
+def assert_field_not_exists(data: dict, field: str, message: str = ""):
+    """Assert a field does not exist in the data."""
+    msg = message or f"Field '{field}' should not exist in data"
+    assert field not in data, msg
+
+
+def assert_list_contains(items: list, expected_item: Any, message: str = ""):
+    """Assert a list contains a specific item."""
+    msg = message or f"Expected list to contain {expected_item!r}"
+    assert expected_item in items, msg
+
+
+def assert_list_not_contains(items: list, unexpected_item: Any, message: str = ""):
+    """Assert a list does not contain a specific item."""
+    msg = message or f"Expected list to not contain {unexpected_item!r}"
+    assert unexpected_item not in items, msg
+
+
+def assert_dict_equal(actual: dict, expected: dict, message: str = "", ignore_keys: List[str] = None):
+    """Assert two dictionaries are equal, optionally ignoring keys."""
+    ignore_keys = ignore_keys or []
+    filtered_actual = {k: v for k, v in actual.items() if k not in ignore_keys}
+    filtered_expected = {k: v for k, v in expected.items() if k not in ignore_keys}
+    msg = message or f"Dicts not equal: {filtered_actual} != {filtered_expected}"
+    assert filtered_actual == filtered_expected, msg
+
+
+def assert_dict_subset(subset: dict, superset: dict, message: str = ""):
+    """Assert all key-value pairs in subset exist in superset."""
+    missing = {}
+    for k, v in subset.items():
+        if k not in superset:
+            missing[k] = v
+        elif superset[k] != v:
+            missing[k] = f"expected {v!r}, got {superset[k]!r}"
+    msg = message or f"Subset not found in superset: {missing}"
+    assert not missing, msg
+
+
+def assert_numeric_range(value: Union[int, float], min_val: float = None, max_val: float = None, message: str = ""):
+    """Assert a numeric value is within a range."""
+    if min_val is not None:
+        msg = message or f"Value {value} is less than minimum {min_val}"
+        assert value >= min_val, msg
+    if max_val is not None:
+        msg = message or f"Value {value} is greater than maximum {max_val}"
+        assert value <= max_val, msg
+
+
+def assert_string_matches(value: str, pattern: str, message: str = ""):
+    """Assert a string matches a regex pattern."""
+    import re
+    msg = message or f"String '{value}' does not match pattern '{pattern}'"
+    assert re.match(pattern, value), msg
+
+
+def assert_string_length(value: str, min_len: int = 0, max_len: int = None, message: str = ""):
+    """Assert a string length is within bounds."""
+    if min_len:
+        msg = message or f"String length {len(value)} is less than minimum {min_len}"
+        assert len(value) >= min_len, msg
+    if max_len is not None:
+        msg = message or f"String length {len(value)} exceeds maximum {max_len}"
+        assert len(value) <= max_len, msg
+
+
+def assert_is_true(value: Any, message: str = ""):
+    """Assert a value is truthy."""
+    msg = message or f"Expected truthy value, got {value!r}"
+    assert value, msg
+
+
+def assert_is_false(value: Any, message: str = ""):
+    """Assert a value is falsy."""
+    msg = message or f"Expected falsy value, got {value!r}"
+    assert not value, msg
+
+
+def assert_is_none(value: Any, message: str = ""):
+    """Assert a value is None."""
+    msg = message or f"Expected None, got {value!r}"
+    assert value is None, msg
+
+
+def assert_is_not_none(value: Any, message: str = ""):
+    """Assert a value is not None."""
+    msg = message or f"Expected not None, got {value!r}"
+    assert value is not None, msg
+
+
+def assert_instance_of(obj: Any, expected_type: type, message: str = ""):
+    """Assert an object is an instance of the expected type."""
+    msg = message or f"Expected {expected_type.__name__}, got {type(obj).__name__}"
+    assert isinstance(obj, expected_type), msg
+
+
+def assert_greater_than(actual: Union[int, float], expected: Union[int, float], message: str = ""):
+    """Assert actual is greater than expected."""
+    msg = message or f"Expected {actual} > {expected}"
+    assert actual > expected, msg
+
+
+def assert_less_than(actual: Union[int, float], expected: Union[int, float], message: str = ""):
+    """Assert actual is less than expected."""
+    msg = message or f"Expected {actual} < {expected}"
+    assert actual < expected, msg
+
+
+def assert_greater_equal(actual: Union[int, float], expected: Union[int, float], message: str = ""):
+    """Assert actual is greater than or equal to expected."""
+    msg = message or f"Expected {actual} >= {expected}"
+    assert actual >= expected, msg
+
+
+def assert_less_equal(actual: Union[int, float], expected: Union[int, float], message: str = ""):
+    """Assert actual is less than or equal to expected."""
+    msg = message or f"Expected {actual} <= {expected}"
+    assert actual <= expected, msg
+
+
+def assert_almost_equal(
+    actual: float, expected: float, places: int = 7, message: str = ""
+):
+    """Assert two floats are almost equal within given decimal places."""
+    msg = message or f"Expected {actual} ≈ {expected} (places={places})"
+    assert round(abs(actual - expected), places) == 0, msg
