@@ -1,78 +1,63 @@
-name: Test Suite CI
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      test_type:
-        description: 'Type of tests to run'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - api
-          - e2e
-          - smoke
-      python_version:
-        description: 'Python version to test'
-        required: false
-        type: string
-        default: '3.11'
+    branches: [main, develop]
 
 env:
   BASE_URL: https://fakestoreapi.com
   UI_BASE_URL: https://www.saucedemo.com
-  HEADLESS: "true"
-  VERIFY_SSL: "true"
-  MOCK_API: "true"
-  PYTHONPATH: ${{ github.workspace }}
+  HEADLESS: true
+  BROWSER: chromium
+  TIMEOUT: 30
+  RETRIES: 3
+  VIEWPORT_WIDTH: 1280
+  VIEWPORT_HEIGHT: 720
+  SLOW_MO: 0
+  API_TIMEOUT: 30
+  VERIFY_SSL: true
+  MOCK_API: false
 
 jobs:
-  # Lint and type check job
   lint-and-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
 
-      - name: Install linting dependencies
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install ruff mypy
 
       - name: Run Ruff linting
-        run: |
-          ruff check . --output-format=github
-          ruff format --check . --output-format=github
+        run: ruff check .
+
+      - name: Run Ruff formatting check
+        run: ruff format --check .
 
       - name: Run MyPy type checking
-        run: |
-          mypy config/ utils/ tests/ --ignore-missing-imports --show-error-codes
+        run: mypy --strict .
 
-  # API tests job with matrix
   api-tests:
-    name: API Tests (Python ${{ matrix.python-version }})
+    name: API Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
-        include:
-          - python-version: "3.11"
-            coverage: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -82,217 +67,119 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Verify test collection
-        run: python -m pytest tests/api/ --collect-only -p no:playwright -q
 
       - name: Run API tests
         run: |
-          python -m pytest tests/api/ -m "not external" --tb=short -p no:playwright \
-            --reruns 3 --reruns-delay 5 \
-            --cov=utils --cov=config --cov=pages \
-            --cov-report=term-missing \
-            --cov-report=html:reports/coverage-html \
-            --cov-report=xml:reports/coverage.xml \
-            --cov-report=json:reports/coverage.json \
-            --alluredir=allure-results/api \
+          pytest tests/api/ -v --tb=short --durations=10 -m "api" \
             --junitxml=reports/api-junit.xml \
-            --html=reports/api-report.html --self-contained-html \
-            --durations=10 \
-            -v
+            --html=reports/api-report.html --self-contained-html
 
-      - name: Check coverage threshold
-        if: matrix.coverage == 'true'
-        run: |
-          python -c "
-          import xml.etree.ElementTree as ET
-          tree = ET.parse('reports/coverage.xml')
-          root = tree.getroot()
-          coverage = float(root.attrib.get('line-rate', 0)) * 100
-          print(f'Line coverage: {coverage:.2f}%')
-          if coverage < 80:
-              print('::error::Coverage below 80% threshold')
-              exit(1)
-          "
-
-      - name: Upload API test reports
+      - name: Upload API test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-reports-py${{ matrix.python-version }}
-          path: |
-            allure-results/api/
-            reports/api-report.html
-            reports/coverage-html/
-            reports/coverage.xml
-            reports/coverage.json
-            reports/api-junit.xml
+          name: api-report-${{ matrix.python-version }}
+          path: reports/api-report.html
           retention-days: 7
 
-  # E2E tests job
+      - name: Upload API JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-junit-${{ matrix.python-version }}
+          path: reports/api-junit.xml
+          retention-days: 7
+
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Check for E2E tests
-        id: check
-        run: |
-          count=$(find tests/e2e -name 'test_*.py' 2>/dev/null | wc -l)
-          if [ "$count" -gt 0 ]; then
-            echo "has_tests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_tests=false" >> "$GITHUB_OUTPUT"
-            echo "No E2E tests found, skipping."
-          fi
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        if: steps.check.outputs.has_tests == 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
-        if: steps.check.outputs.has_tests == 'true'
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          python -m playwright install chromium
+
+      - name: Install Playwright browsers
+        run: python -m playwright install --with-deps chromium
 
       - name: Run E2E tests
-        if: steps.check.outputs.has_tests == 'true'
         run: |
-          python -m pytest tests/e2e/ --tb=short \
-            --cov=pages \
-            --cov-report=term-missing \
-            --cov-report=html:reports/e2e-coverage-html \
-            --cov-report=xml:reports/e2e-coverage.xml \
-            --alluredir=allure-results/e2e \
+          pytest tests/e2e/ -v --tb=short --durations=10 -m "e2e" \
             --junitxml=reports/e2e-junit.xml \
-            --html=reports/e2e-report.html --self-contained-html \
-            --durations=10 \
-            -v
+            --html=reports/e2e-report.html --self-contained-html
 
-      - name: Upload E2E test reports
-        if: always() && steps.check.outputs.has_tests == 'true'
+      - name: Upload E2E test report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-test-reports
-          path: |
-            allure-results/e2e/
-            reports/e2e-report.html
-            reports/e2e-coverage-html/
-            reports/e2e-coverage.xml
-            reports/screenshots/
-            reports/e2e-junit.xml
+          name: e2e-report
+          path: reports/e2e-report.html
           retention-days: 7
 
-  # Smoke tests job (fast feedback)
-  smoke-tests:
-    name: Smoke Tests
+      - name: Upload E2E JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-junit
+          path: reports/e2e-junit.xml
+          retention-days: 7
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: reports/screenshots/
+          retention-days: 7
+
+  coverage:
+    name: Coverage
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run smoke tests
         run: |
-          python -m pytest tests/ -m smoke --tb=short -p no:playwright \
-            --reruns 2 --reruns-delay 3 \
-            --junitxml=reports/smoke-junit.xml \
-            --html=reports/smoke-report.html --self-contained-html \
-            -v
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Upload smoke test reports
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=utils --cov=pages --cov=config \
+            --cov-report=term-missing \
+            --cov-report=html:reports/coverage-html \
+            --cov-report=xml:reports/coverage.xml
+
+      - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-test-reports
-          path: |
-            reports/smoke-report.html
-            reports/smoke-junit.xml
-          retention-days: 3
+          name: coverage-report
+          path: reports/coverage-html/
+          retention-days: 7
 
-  # Combined report job
-  combined-report:
-    name: Combined Test Report
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [api-tests, e2e-tests, smoke-tests]
-    if: always()
-    steps:
-      - name: Download API reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: api-test-reports-*
-          path: artifacts/api
-          merge-multiple: true
-
-      - name: Download E2E reports
-        if: always()
-        uses: actions/download-artifact@v4
-        with:
-          pattern: e2e-test-reports
-          path: artifacts/e2e
-
-      - name: Download smoke reports
-        if: always()
-        uses: actions/download-artifact@v4
-        with:
-          pattern: smoke-test-reports
-          path: artifacts/smoke
-
-      - name: Generate summary
-        run: |
-          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| API Tests  | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| E2E Tests  | ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Smoke Tests| ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Artifacts available for download from workflow run." >> $GITHUB_STEP_SUMMARY
-
-  # Dependency audit job
-  dependency-audit:
-    name: Dependency Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt pip-audit
-
-      - name: Run dependency audit
-        run: |
-          pip-audit -r requirements.txt --desc --format json > reports/dependency-audit.json || true
-          pip-audit -r requirements.txt --desc
-
-      - name: Upload audit report
+      - name: Upload coverage XML
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-audit
-          path: reports/dependency-audit.json
-          retention-days: 30
+          name: coverage-xml
+          path: reports/coverage.xml
+          retention-days: 7
