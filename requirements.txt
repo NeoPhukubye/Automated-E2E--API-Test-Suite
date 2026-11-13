@@ -31,8 +31,8 @@ jsonschema==4.23.0
 faker==40.43.0
 
 # Linting & type checking (dev dependencies)
-# ruff==0.7.0
-# mypy==1.11.2
+ruff==0.7.0
+mypy==1.11.2
 
 # Security audit (dev dependencies)
-# pip-audit==2.7.0
+pip-audit==2.7.0
