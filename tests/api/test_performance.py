@@ -1,6 +1,5 @@
 import pytest
 import allure
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -108,8 +107,7 @@ class TestConcurrentLoad:
         results = []
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = {
-                executor.submit(api.get, endpoint): endpoint
-                for endpoint in endpoints
+                executor.submit(api.get, endpoint): endpoint for endpoint in endpoints
             }
             for future in as_completed(futures):
                 response = future.result()
@@ -127,7 +125,9 @@ class TestConcurrentLoad:
             times.append(response.elapsed.total_seconds())
         avg_time = sum(times) / len(times)
         max_time = max(times)
-        assert avg_time < 3.0, f"Average response time {avg_time:.2f}s exceeds threshold"
+        assert (
+            avg_time < 3.0
+        ), f"Average response time {avg_time:.2f}s exceeds threshold"
         assert max_time < 10.0, f"Max response time {max_time:.2f}s exceeds threshold"
 
     @allure.severity(allure.severity_level.MINOR)
@@ -141,7 +141,7 @@ class TestConcurrentLoad:
             times.append(response.elapsed.total_seconds())
         avg = sum(times) / len(times)
         variance = sum((t - avg) ** 2 for t in times) / len(times)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
         assert std_dev < avg * 2, f"High variance: std_dev={std_dev:.2f}, avg={avg:.2f}"
 
     def _run_concurrent(self, api, endpoint: str, count: int) -> list[int]:

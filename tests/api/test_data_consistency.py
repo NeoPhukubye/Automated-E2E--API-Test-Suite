@@ -22,7 +22,9 @@ class TestProductDataConsistency:
         response = api.get("/products")
         products = assert_json_response(response)
         for product in products:
-            assert product["price"] > 0, f"Product {product['id']} has non-positive price"
+            assert (
+                product["price"] > 0
+            ), f"Product {product['id']} has non-positive price"
 
     @allure.severity(allure.severity_level.NORMAL)
     @allure.story("Data Validation")
@@ -41,9 +43,9 @@ class TestProductDataConsistency:
         prod_resp = api.get("/products")
         products = assert_json_response(prod_resp)
         for product in products:
-            assert product["category"] in valid_categories, (
-                f"Product {product['id']} has invalid category: {product['category']}"
-            )
+            assert (
+                product["category"] in valid_categories
+            ), f"Product {product['id']} has invalid category: {product['category']}"
 
     @allure.severity(allure.severity_level.MINOR)
     @allure.story("Data Validation")
@@ -51,9 +53,9 @@ class TestProductDataConsistency:
         response = api.get("/products")
         products = assert_json_response(response)
         for product in products:
-            assert product["image"].startswith("http"), (
-                f"Product {product['id']} has invalid image URL"
-            )
+            assert product["image"].startswith(
+                "http"
+            ), f"Product {product['id']} has invalid image URL"
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Referential Integrity")
@@ -108,9 +110,9 @@ class TestCartDataConsistency:
         carts = response.json()
         for cart in carts:
             for item in cart["products"]:
-                assert item["quantity"] > 0, (
-                    f"Cart {cart['id']} has item with non-positive quantity"
-                )
+                assert (
+                    item["quantity"] > 0
+                ), f"Cart {cart['id']} has item with non-positive quantity"
 
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.story("Referential Integrity")
@@ -122,9 +124,9 @@ class TestCartDataConsistency:
         carts = cart_resp.json()
         for cart in carts:
             for item in cart["products"]:
-                assert item["productId"] in valid_ids, (
-                    f"Cart {cart['id']} references invalid productId {item['productId']}"
-                )
+                assert (
+                    item["productId"] in valid_ids
+                ), f"Cart {cart['id']} references invalid productId {item['productId']}"
 
 
 @pytest.mark.api
@@ -162,8 +164,12 @@ class TestUserDataConsistency:
         response = api.get("/users")
         users = response.json()
         for user in users:
-            assert user["name"]["firstname"].strip(), f"User {user['id']} missing firstname"
-            assert user["name"]["lastname"].strip(), f"User {user['id']} missing lastname"
+            assert user["name"][
+                "firstname"
+            ].strip(), f"User {user['id']} missing firstname"
+            assert user["name"][
+                "lastname"
+            ].strip(), f"User {user['id']} missing lastname"
 
     @allure.severity(allure.severity_level.NORMAL)
     @allure.story("Data Validation")

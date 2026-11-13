@@ -3,7 +3,7 @@
 import os
 import json
 import logging
-from typing import Generator, Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Iterator
 from urllib.parse import urlparse, parse_qs
 from contextlib import contextmanager
 
@@ -13,8 +13,11 @@ import requests_mock as requests_mock_module
 from utils.api_client import APIClient, RequestLog
 from utils.test_data import DataGenerator
 from config.settings import (
-    UI_BASE_URL, HEADLESS, VIEWPORT_WIDTH, VIEWPORT_HEIGHT,
-    BASE_URL, VERIFY_SSL, MOCK_API, API_TIMEOUT
+    UI_BASE_URL,
+    HEADLESS,
+    VIEWPORT_WIDTH,
+    VIEWPORT_HEIGHT,
+    BASE_URL,
 )
 
 
@@ -85,7 +88,7 @@ def api(request):
 
 
 @pytest.fixture
-def api_client() -> APIClient:
+def api_client() -> Iterator[APIClient]:
     """Provide a raw API client without response storing wrapper.
 
     Useful for tests that need direct access to the client methods
@@ -174,7 +177,8 @@ def _get_request_body(request_proxy) -> Dict[str, Any]:
         if isinstance(body, bytes):
             body = body.decode("utf-8")
         if isinstance(body, str) and body:
-            return json.loads(body)
+            result = json.loads(body)
+            return result if isinstance(result, dict) else {}
     except Exception:
         pass
     return {}
@@ -188,7 +192,9 @@ class APIMockBuilder:
         self.products = _load_fixture("products")
         self.users = _load_fixture("users")
         self.carts = _load_fixture("carts")
-        self.product1 = self.products[0] if self.products else _load_fixture("product_1")
+        self.product1 = (
+            self.products[0] if self.products else _load_fixture("product_1")
+        )
         self.login = _load_fixture("login")
         self.categories = _load_fixture("categories")
         self._carts_state = list(self.carts)
@@ -206,7 +212,7 @@ class APIMockBuilder:
 
     def mock_get(self, request, context):
         """Mock GET requests."""
-        url_str = request.url if hasattr(request, 'url') else str(request)
+        url_str = request.url if hasattr(request, "url") else str(request)
         path, query = self._parse_url(url_str)
 
         if path == "/products":
@@ -223,8 +229,11 @@ class APIMockBuilder:
 
         elif path.startswith("/products/category/"):
             from urllib.parse import unquote
+
             category = unquote(path.split("/")[-1])
-            filtered = [p for p in self._products_state if p.get("category") == category]
+            filtered = [
+                p for p in self._products_state if p.get("category") == category
+            ]
             context.status_code = 200
             context.headers["Content-Type"] = "application/json"
             return filtered if filtered else []
@@ -240,7 +249,9 @@ class APIMockBuilder:
                 context.status_code = 404
                 context.headers["Content-Type"] = "application/json"
                 return {"error": "Product not found"}
-            product = next((p for p in self._products_state if str(p.get("id")) == pid), None)
+            product = next(
+                (p for p in self._products_state if str(p.get("id")) == pid), None
+            )
             if product is None:
                 context.status_code = 404
                 context.headers["Content-Type"] = "application/json"
@@ -284,7 +295,8 @@ class APIMockBuilder:
             result = list(self._carts_state)
             if startdate or enddate:
                 result = [
-                    c for c in result
+                    c
+                    for c in result
                     if (not startdate or c["date"] >= startdate)
                     and (not enddate or c["date"] <= enddate)
                 ]
@@ -322,7 +334,7 @@ class APIMockBuilder:
 
     def mock_post(self, request, context):
         """Mock POST requests."""
-        url_str = request.url if hasattr(request, 'url') else str(request)
+        url_str = request.url if hasattr(request, "url") else str(request)
         path, _ = self._parse_url(url_str)
         body = _get_request_body(request)
 
@@ -356,7 +368,7 @@ class APIMockBuilder:
 
     def mock_put(self, request, context):
         """Mock PUT requests."""
-        url_str = request.url if hasattr(request, 'url') else str(request)
+        url_str = request.url if hasattr(request, "url") else str(request)
         path, _ = self._parse_url(url_str)
         body = _get_request_body(request)
 
@@ -383,7 +395,7 @@ class APIMockBuilder:
 
     def mock_delete(self, request, context):
         """Mock DELETE requests."""
-        url_str = request.url if hasattr(request, 'url') else str(request)
+        url_str = request.url if hasattr(request, "url") else str(request)
         path, _ = self._parse_url(url_str)
 
         if path.startswith("/products/"):
@@ -429,15 +441,15 @@ class APIMockBuilder:
         )
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_external_api(requests_mock):
-    """Mock external API calls when MOCK_API setting is enabled."""
-    if MOCK_API:
-        builder = APIMockBuilder(BASE_URL)
-        builder.register_mocks(requests_mock)
-        yield builder
-    else:
-        yield None
+    """Mock external API calls when explicitly requested.
+
+    Use this fixture in tests that need API mocking.
+    """
+    builder = APIMockBuilder(BASE_URL)
+    builder.register_mocks(requests_mock)
+    yield builder
 
 
 @pytest.fixture
@@ -494,9 +506,13 @@ def performance_thresholds() -> Dict[str, float]:
 
 
 @contextmanager
-def temporary_mock(requests_mock, path: str, method: str, response: Any, status_code: int = 200):
+def temporary_mock(
+    requests_mock, path: str, method: str, response: Any, status_code: int = 200
+):
     """Context manager for temporarily adding a mock response."""
-    matcher = requests_mock.request(method.upper(), path, json=response, status_code=status_code)
+    matcher = requests_mock.request(
+        method.upper(), path, json=response, status_code=status_code
+    )
     try:
         yield matcher
     finally:

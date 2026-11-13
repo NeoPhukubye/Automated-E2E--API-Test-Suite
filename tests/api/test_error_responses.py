@@ -2,7 +2,7 @@
 
 import pytest
 import allure
-from utils.assertions import assert_status_code, assert_json_response
+from utils.assertions import assert_json_response
 
 
 @pytest.mark.api
@@ -39,7 +39,9 @@ class TestErrorResponses:
     @allure.story("Error Response Headers")
     def test_error_response_has_content_type(self, api):
         """Verify error responses include Content-Type header."""
-        response = api.post("/auth/login", json={"username": "wrong", "password": "wrong"})
+        response = api.post(
+            "/auth/login", json={"username": "wrong", "password": "wrong"}
+        )
         if response.status_code in (400, 401):
             assert "content-type" in response.headers
             assert "application/json" in response.headers["content-type"]

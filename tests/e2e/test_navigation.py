@@ -1,5 +1,4 @@
 import pytest
-from pages.login_page import LoginPage
 from pages.home_page import HomePage
 from pages.cart_page import CartPage
 
@@ -11,14 +10,15 @@ class TestNavigation:
     def test_unauthenticated_redirect(self, page):
         """Verify unauthenticated users see the login page when accessing protected routes."""
         from config.settings import UI_BASE_URL
+
         page.goto(f"{UI_BASE_URL}/inventory.html", wait_until="domcontentloaded")
         page.locator("#login-button").first.wait_for(state="visible")
         is_on_login = page.url.rstrip("/") == UI_BASE_URL
         has_login_form = page.locator("#login-button").is_visible()
         has_error = page.locator("[data-test='error']").is_visible()
-        assert is_on_login or has_login_form or has_error, (
-            f"Expected login page or error, but got {page.url}"
-        )
+        assert (
+            is_on_login or has_login_form or has_error
+        ), f"Expected login page or error, but got {page.url}"
 
     def test_cart_page_title(self, logged_in_page):
         """Verify cart page displays correct title."""
@@ -30,6 +30,7 @@ class TestNavigation:
     def test_back_from_product_detail(self, logged_in_page):
         """Verify back button returns to inventory from product detail."""
         from pages.product_page import ProductPage
+
         home = HomePage(logged_in_page)
         home.click_product(0)
         product = ProductPage(logged_in_page)
@@ -49,6 +50,7 @@ class TestNavigation:
     def test_logout(self, logged_in_page):
         """Verify user can log out via burger menu."""
         from config.settings import UI_BASE_URL
+
         logged_in_page.locator("#react-burger-menu-btn").click()
         logged_in_page.locator("#logout_sidebar_link").click()
         assert logged_in_page.url.rstrip("/") == UI_BASE_URL

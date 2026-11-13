@@ -1,5 +1,6 @@
 from pages.base_page import BasePage
 from config.settings import UI_BASE_URL
+from typing import Optional, Literal
 
 
 class LoginPage(BasePage):
@@ -11,8 +12,13 @@ class LoginPage(BasePage):
     LOGIN_BUTTON = "#login-button"
     ERROR_MESSAGE = "[data-test='error']"
 
-    def navigate(self, path: str = ""):
-        super().navigate(self.URL)
+    def navigate(
+        self,
+        path: str = "",
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "domcontentloaded",
+        timeout: Optional[int] = None,
+    ) -> None:
+        super().navigate(self.URL, wait_until=wait_until, timeout=timeout)
 
     def login(self, username: str, password: str):
         self.fill(self.USERNAME_INPUT, username)

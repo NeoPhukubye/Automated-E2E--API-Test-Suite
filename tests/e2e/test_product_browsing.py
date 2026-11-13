@@ -58,7 +58,6 @@ class TestProductBrowsing:
     def test_click_product_opens_detail(self, logged_in_page):
         """Verify clicking a product navigates to its detail page."""
         home = HomePage(logged_in_page)
-        first_product_name = home.get_product_names()[0]
         home.click_product(0)
         assert "/inventory-item.html" in home.get_url()
 

@@ -1,6 +1,5 @@
 import pytest
 import allure
-from pages.login_page import LoginPage
 
 
 @pytest.mark.e2e

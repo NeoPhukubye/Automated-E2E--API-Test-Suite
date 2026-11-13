@@ -1,5 +1,6 @@
 from pages.base_page import BasePage
 from config.settings import UI_BASE_URL, TIMEOUT
+from typing import Optional, Literal
 
 
 class CartPage(BasePage):
@@ -14,8 +15,13 @@ class CartPage(BasePage):
     CHECKOUT_BUTTON = "#checkout"
     PAGE_TITLE = ".title"
 
-    def navigate(self, path: str = ""):
-        super().navigate(self.URL)
+    def navigate(
+        self,
+        path: str = "",
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "domcontentloaded",
+        timeout: Optional[int] = None,
+    ) -> None:
+        super().navigate(self.URL, wait_until=wait_until, timeout=timeout)
         self.wait_until_ready()
 
     def wait_until_ready(self, timeout: int = TIMEOUT * 1000):

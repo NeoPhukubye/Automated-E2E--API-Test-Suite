@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RequestLog:
     """Data class for storing request/response details for debugging."""
+
     method: str
     url: str
     request_headers: Dict[str, str] = field(default_factory=dict)
@@ -78,18 +79,29 @@ class APIClient:
         self._last_request_log: Optional[RequestLog] = None
 
         self.session = requests.Session()
-        self.session.headers.update({
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-        })
+        self.session.headers.update(
+            {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+            }
+        )
         self.session.verify = verify_ssl
 
         retry_strategy = Retry(
             total=retries,
             backoff_factor=2,
             status_forcelist=[403, 429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE"],
+            allowed_methods=[
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS",
+                "HEAD",
+                "TRACE",
+            ],
             respect_retry_after_header=True,
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
@@ -108,23 +120,20 @@ class APIClient:
 
         if log.error:
             logger.error(
-                "API Request Failed: %s %s - Error: %s",
-                log.method, log.url, log.error
+                "API Request Failed: %s %s - Error: %s", log.method, log.url, log.error
             )
         else:
             logger.info(
                 "API Request: %s %s - Status: %s - Time: %.2fms",
-                log.method, log.url, log.response_status, log.elapsed_ms
+                log.method,
+                log.url,
+                log.response_status,
+                log.elapsed_ms,
             )
 
         self._last_request_log = log
 
-    def _request(
-        self,
-        method: str,
-        endpoint: str,
-        **kwargs: Any
-    ) -> Response:
+    def _request(self, method: str, endpoint: str, **kwargs: Any) -> Response:
         """Internal method to execute HTTP request with logging."""
         url = self._build_url(endpoint)
         start_time = time.perf_counter()
@@ -132,7 +141,7 @@ class APIClient:
         log = RequestLog(
             method=method.upper(),
             url=url,
-            request_headers=dict(self.session.headers),
+            request_headers={k: str(v) for k, v in self.session.headers.items()},
             request_body=kwargs.get("json"),
         )
 
@@ -155,8 +164,7 @@ class APIClient:
             log.elapsed_ms = elapsed_ms
             self._log_request(log)
             raise APIClientRequestError(
-                f"Request timed out after {self.timeout}s: {url}",
-                request_log=log
+                f"Request timed out after {self.timeout}s: {url}", request_log=log
             ) from e
 
         except requests.exceptions.ConnectionError as e:
@@ -165,8 +173,7 @@ class APIClient:
             log.elapsed_ms = elapsed_ms
             self._log_request(log)
             raise APIClientRequestError(
-                f"Connection error for {url}: {e}",
-                request_log=log
+                f"Connection error for {url}: {e}", request_log=log
             ) from e
 
         except requests.exceptions.RequestException as e:
@@ -175,8 +182,7 @@ class APIClient:
             log.elapsed_ms = elapsed_ms
             self._log_request(log)
             raise APIClientRequestError(
-                f"Request failed for {url}: {e}",
-                request_log=log
+                f"Request failed for {url}: {e}", request_log=log
             ) from e
 
     def get(self, endpoint: str, **kwargs: Any) -> Response:

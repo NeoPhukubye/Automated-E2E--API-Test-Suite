@@ -1,18 +1,20 @@
 """JSON Schema validation contracts for API responses using Pydantic models."""
 
 from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 from pydantic.alias_generators import to_camel
 
 
 class Rating(BaseModel):
     """Product rating model."""
+
     rate: float = Field(ge=0, le=5)
     count: int = Field(ge=0)
 
 
 class Product(BaseModel):
     """Product response model matching FakeStore API."""
+
     id: int
     title: str = Field(min_length=1)
     price: float = Field(ge=0)
@@ -30,6 +32,7 @@ class Product(BaseModel):
 
 class CartProduct(BaseModel):
     """Product within a cart."""
+
     product_id: int
     quantity: int = Field(ge=1)
 
@@ -41,6 +44,7 @@ class CartProduct(BaseModel):
 
 class Cart(BaseModel):
     """Cart response model."""
+
     id: int
     user_id: int
     date: str
@@ -56,12 +60,14 @@ class Cart(BaseModel):
 
 class Geolocation(BaseModel):
     """Geolocation coordinates."""
+
     lat: str
     long: str
 
 
 class Address(BaseModel):
     """User address model."""
+
     city: str
     street: str
     number: int | float
@@ -71,6 +77,7 @@ class Address(BaseModel):
 
 class Name(BaseModel):
     """User name model."""
+
     firstname: str = Field(min_length=1)
     lastname: str = Field(min_length=1)
 
@@ -82,6 +89,7 @@ class Name(BaseModel):
 
 class User(BaseModel):
     """User response model."""
+
     id: int
     email: str
     username: str = Field(min_length=1)
@@ -100,11 +108,13 @@ class User(BaseModel):
 
 class AuthToken(BaseModel):
     """Auth token response model."""
+
     token: str = Field(min_length=1)
 
 
 class LoginResponse(BaseModel):
     """Login response model."""
+
     id: int
     username: str = Field(min_length=1)
     email: str = Field(pattern=r"^[^@]+@[^@]+\.[^@]+$")
@@ -123,6 +133,7 @@ class LoginResponse(BaseModel):
 
 class Category(BaseModel):
     """Category response model."""
+
     name: str = Field(min_length=1)
 
 
@@ -301,7 +312,7 @@ def get_schema_for_type(entity_type: str) -> Optional[Dict[str, Any]]:
     Returns:
         The JSON schema dict, or None if the type is unknown.
     """
-    schemas = {
+    schemas: Dict[str, Dict[str, Any]] = {
         "product": PRODUCT_SCHEMA,
         "cart": CART_SCHEMA,
         "user": USER_SCHEMA,

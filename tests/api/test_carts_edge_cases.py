@@ -2,7 +2,11 @@
 
 import pytest
 import allure
-from utils.assertions import assert_status_code, assert_json_response, assert_list_not_empty
+from utils.assertions import (
+    assert_status_code,
+    assert_json_response,
+    assert_list_not_empty,
+)
 from utils.schema_validator import validate_cart_schema
 
 
@@ -74,7 +78,10 @@ class TestCartsEdgeCases:
         payload = {
             "userId": 1,
             "date": "2024-01-01",
-            "products": [{"productId": 1, "quantity": 2}, {"productId": 2, "quantity": 1}],
+            "products": [
+                {"productId": 1, "quantity": 2},
+                {"productId": 2, "quantity": 1},
+            ],
         }
         response = api.post("/carts", json=payload)
         assert_status_code(response, 201, accepted_codes=[200])

@@ -21,6 +21,7 @@ class TestSortingAndFilters:
     def test_sort_resets_after_product_view(self, logged_in_page):
         """Verify sort order resets to default (A-Z) after viewing a product and returning."""
         from pages.product_page import ProductPage
+
         home = HomePage(logged_in_page)
         home.sort_products("hilo")
         home.click_product(0)

@@ -3,7 +3,7 @@
 import pytest
 import allure
 from utils.assertions import assert_status_code, assert_json_response
-from utils.schema_validator import validate_auth_token_schema, validate_login_response_schema
+from utils.schema_validator import validate_auth_token_schema
 
 
 @pytest.mark.api

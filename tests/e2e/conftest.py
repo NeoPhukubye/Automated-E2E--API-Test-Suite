@@ -116,7 +116,12 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
     if report.when == "call" and report.failed:
-        page = item.funcargs.get("page") or item.funcargs.get("logged_in_page") or item.funcargs.get("logged_in_problem_user") or item.funcargs.get("logged_in_performance_glitch_user")
+        page = (
+            item.funcargs.get("page")
+            or item.funcargs.get("logged_in_page")
+            or item.funcargs.get("logged_in_problem_user")
+            or item.funcargs.get("logged_in_performance_glitch_user")
+        )
         if page:
             screenshot_dir = "reports/screenshots"
             os.makedirs(screenshot_dir, exist_ok=True)

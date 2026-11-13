@@ -8,6 +8,7 @@ from faker import Faker
 @dataclass
 class UserData:
     """Structured user test data."""
+
     email: str
     username: str
     password: str
@@ -48,6 +49,7 @@ class UserData:
 @dataclass
 class ProductData:
     """Structured product test data."""
+
     title: str
     price: float
     description: str
@@ -68,6 +70,7 @@ class ProductData:
 @dataclass
 class CartData:
     """Structured cart test data."""
+
     user_id: int
     date: str
     products: List[Dict[str, Any]] = field(default_factory=list)
@@ -149,17 +152,19 @@ class DataGenerator:
     def random_int(self, min: int = 0, max: int = 100) -> int:
         return self._fake.random_int(min=min, max=max)
 
-    def random_float(self, min: float = 0.0, max: float = 1000.0, precision: int = 2) -> float:
-        return round(self._fake.random.uniform(min, max), precision)
+    def random_float(
+        self, min: float = 0.0, max: float = 1000.0, precision: int = 2
+    ) -> float:
+        return float(round(self._fake.random.uniform(min, max), precision))
 
-    def random_choice(self, choices: list) -> Any:
+    def random_choice(self, choices: List[Any]) -> Any:
         return self._fake.random.choice(choices)
 
-    def random_sample(self, population: list, k: int = 1) -> list:
-        return self._fake.random.sample(population, k=k)
+    def random_sample(self, population: List[Any], k: int = 1) -> List[Any]:
+        return list(self._fake.random.sample(population, k=k))
 
     def random_bool(self) -> bool:
-        return self._fake.random.random() > 0.5
+        return bool(self._fake.random.random() > 0.5)
 
     def sentence(self, nb_words: int = 10) -> str:
         return self._fake.sentence(nb_words=nb_words)
@@ -169,11 +174,15 @@ class DataGenerator:
 
     def date_between(self, start_date: str = "-30d", end_date: str = "today") -> str:
         """Generate a date string between start and end."""
-        return self._fake.date_between(start_date=start_date, end_date=end_date).isoformat()
+        return self._fake.date_between(
+            start_date=start_date, end_date=end_date
+        ).isoformat()
 
     def date_time_between(self, start_date: str = "-30d", end_date: str = "now") -> str:
         """Generate a datetime string between start and end."""
-        return self._fake.date_time_between(start_date=start_date, end_date=end_date).isoformat()
+        return self._fake.date_time_between(
+            start_date=start_date, end_date=end_date
+        ).isoformat()
 
     def generate_user_data(self) -> UserData:
         """Generate structured user test data."""
@@ -300,7 +309,7 @@ class DataGenerator:
         sort: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Generate pagination query parameters."""
-        params = {}
+        params: Dict[str, Any] = {}
         if limit is not None:
             params["limit"] = limit
         if sort is not None:

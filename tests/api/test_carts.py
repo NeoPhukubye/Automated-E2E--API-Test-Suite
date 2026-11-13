@@ -3,7 +3,7 @@
 import pytest
 import allure
 from utils.schema_validator import validate_cart_schema
-from utils.assertions import assert_status_code, assert_json_response, assert_list_not_empty
+from utils.assertions import assert_status_code, assert_json_response
 
 
 @pytest.mark.api

@@ -2,7 +2,11 @@
 
 import pytest
 import allure
-from utils.assertions import assert_status_code, assert_json_response, assert_list_not_empty
+from utils.assertions import (
+    assert_status_code,
+    assert_json_response,
+    assert_list_not_empty,
+)
 
 
 @pytest.mark.api
@@ -46,9 +50,7 @@ class TestCartWorkflow:
         products = assert_json_response(products_resp)
         assert len(products) >= 1
 
-        cart_items = [
-            {"productId": p["id"], "quantity": 1} for p in products[:2]
-        ]
+        cart_items = [{"productId": p["id"], "quantity": 1} for p in products[:2]]
         cart_payload = {"userId": 1, "date": "2024-06-15", "products": cart_items}
         create_resp = api.post("/carts", json=cart_payload)
         assert_status_code(create_resp, 201, accepted_codes=[200])
@@ -71,7 +73,11 @@ class TestCartWorkflow:
 
         update_resp = api.put(
             f"/carts/{cart['id']}",
-            json={"userId": cart["userId"], "date": cart["date"], "products": updated_products},
+            json={
+                "userId": cart["userId"],
+                "date": cart["date"],
+                "products": updated_products,
+            },
         )
         assert_status_code(update_resp, 200)
 

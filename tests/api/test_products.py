@@ -3,7 +3,12 @@
 import pytest
 import allure
 from utils.schema_validator import validate_product_schema, validate_products
-from utils.assertions import assert_status_code, assert_json_response, assert_schema_valid, assert_list_not_empty, assert_has_keys
+from utils.assertions import (
+    assert_status_code,
+    assert_json_response,
+    assert_list_not_empty,
+    assert_has_keys,
+)
 
 
 @pytest.mark.api
